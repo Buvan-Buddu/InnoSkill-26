@@ -1,0 +1,30 @@
+Priya Sharma
+Email: priya.sharma@ai.org | Phone: (555) 987-6543 | LinkedIn: linkedin.com/in/psharma
+
+EXECUTIVE SUMMARY
+Data Scientist & AI Specialist with experience developing Machine Learning models, NLP pipelines, and Python backend services. Passionate about ethical AI and accessible data visualization.
+
+SKILLS
+- AI & ML: Python, PyTorch, TensorFlow, Scikit-learn, Pandas, NumPy, NLP
+- Databases & Cloud: PostgreSQL, MongoDB, AWS S3, Docker, Git
+- Analytics: SQL, Data Mining, Matplotlib, Tableau
+
+EXPERIENCE
+AI Researcher & Data Scientist | NeuralData Labs (2022 - Present)
+- Trained Transformer-based text summarization models with 89% accuracy on technical papers.
+- Deployed ML inference REST APIs using FastAPI and Docker containers on AWS.
+
+Data Analyst Intern | Analytics Corp (2021 - 2022)
+- Built SQL queries and PostgreSQL database indexes, reducing query latency by 40%.
+- Created interactive dashboards for candidate metrics tracking.
+
+PROJECTS
+SpeechToText Assist AI
+- Built real-time audio transcription pipeline using Python and WebSockets.
+
+EDUCATION
+M.S. in Data Science & Artificial Intelligence | Tech Institute (2020 - 2022)
+B.Tech in Information Technology (2016 - 2020)
+
+CERTIFICATIONS
+- AWS Certified Machine Learning - Specialty
