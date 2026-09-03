@@ -30,11 +30,18 @@ export default function SkillsPage() {
     <div className="space-y-6">
       
       {/* Title */}
-      <div className="space-y-1">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white">Skills Gap & Career Roadmap</h2>
-        <p className="text-xs sm:text-sm text-slate-500">
-          Compare your capabilities against your target role of <span className="font-bold text-emerald-500">{targetRole}</span>.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white">Skills Gap & Career Roadmap</h2>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Compare your capabilities against your target role of <span className="font-bold text-emerald-500">{targetRole}</span> and enterprise requisitions.
+          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs shrink-0 self-start sm:self-auto">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-[11px] font-extrabold text-cyan-300">SAP SuccessFactors Competency Framework Active</span>
+        </div>
       </div>
 
       {/* Main Grid Layout */}

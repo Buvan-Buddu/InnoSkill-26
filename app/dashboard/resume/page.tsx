@@ -410,14 +410,21 @@ ${report.certifications.extracted.map(c => `- ${c.name} ${c.issuingOrganization 
   return (
     <div className="space-y-6">
       
-      {/* Title */}
-      <div className="space-y-1.5">
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2.5 tracking-tight">
-          <Sparkles className="w-7 h-7 text-emerald-400 shrink-0" /> Resume Intelligence & 13-Section AI Audit
-        </h2>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium max-w-3xl">
-          Upload your resume file to run real AI content parsing, ATS score auditing, vulnerability detection, and voice narration.
-        </p>
+      {/* Title & SAP Integration Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2.5 tracking-tight">
+            <Sparkles className="w-7 h-7 text-emerald-400 shrink-0" /> Resume Intelligence & 13-Section AI Audit
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium max-w-3xl">
+            Upload your resume file to run real AI content parsing, ATS score auditing, vulnerability detection, and voice narration.
+          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs shrink-0 self-start sm:self-auto">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-[11px] font-extrabold text-cyan-300">SAP Requisition Alignment Ready</span>
+        </div>
       </div>
 
       {/* Main Grid Layout */}

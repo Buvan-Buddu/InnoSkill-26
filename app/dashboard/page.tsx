@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { seedJobs } from '@/database/seed-data';
 import { useVoiceAgent } from '@/context/VoiceAgentContext';
+import { SapStatusCard } from '@/components/sap/SapStatusCard';
 
 export default function CandidateDashboard() {
   const { candidate, speakFeedback, activeLanguage } = useVoiceAgent();
@@ -111,6 +112,9 @@ export default function CandidateDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* SAP ENTERPRISE INTEGRATION STATUS CARD */}
+      <SapStatusCard />
 
       {/* QUICK ACTIONS SECTION */}
       <div className="space-y-3">

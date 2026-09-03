@@ -91,6 +91,13 @@ export class VoiceIntentService {
     if (this.matchesAny(text, ['open my resume', 'open resume', 'go to resume', 'show resume analysis', 'view resume', 'upload my resume', 'resume analyze karo', 'resume kholo', 'resume check karo', 'analyze my resume'])) {
       return { action: 'OPEN_RESUME', parameters: { autoUpload: text.includes('upload') }, confidence: 0.99 };
     }
+    if (this.matchesAny(text, [
+      'show me sap jobs', 'search sap opportunities', 'show sap requisitions', 'filter sap jobs',
+      'sap jobs dikhao', 'sap requisitions search karo', 'sap jobs search karo', 'sap job positions dikhao'
+    ])) {
+      return { action: 'SEARCH_JOBS', parameters: { sapOnly: true }, confidence: 0.99 };
+    }
+
     if (this.matchesAny(text, ['show me remote jobs', 'find remote opportunities', 'find jobs that allow remote work', 'show remote jobs', 'filter remote jobs', 'remote jobs dikhao'])) {
       return { action: 'FILTER_REMOTE_JOBS', confidence: 0.99 };
     }

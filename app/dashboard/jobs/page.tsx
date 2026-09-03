@@ -28,14 +28,53 @@ export default function JobsPage() {
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [skillFilter, setSkillFilter] = useState('ALL');
   const [workTypeFilter, setWorkTypeFilter] = useState('ALL');
+  const [sourceFilter, setSourceFilter] = useState<'ALL' | 'SAP' | 'DIRECT'>('ALL');
   const [minMatchScore, setMinMatchScore] = useState(0);
   const [minReadinessScore, setMinReadinessScore] = useState(0);
+
+  // SAP Integration State
+  const [sapJobs, setSapJobs] = useState<any[]>([]);
+  const [sapStatus, setSapStatus] = useState<{ isConfigured: boolean; isConnected: boolean; message: string; count: number }>({
+    isConfigured: false,
+    isConnected: false,
+    message: 'Checking SAP Integration...',
+    count: 0
+  });
 
   // Saved / Applied State
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [appliedJobs, setAppliedJobs] = useState<string[]>([]);
 
   useEffect(() => {
+    // Fetch SAP status and real SAP job requisitions from server-side API
+    fetch('/api/sap/status')
+      .then(res => res.json())
+      .then(data => {
+        setSapStatus({
+          isConfigured: Boolean(data.isConfigured),
+          isConnected: Boolean(data.isConnected),
+          message: data.message || 'SAP Status Loaded',
+          count: data.jobCount || 0
+        });
+      })
+      .catch(() => {
+        setSapStatus({
+          isConfigured: false,
+          isConnected: false,
+          message: 'SAP integration unconfigured or offline.',
+          count: 0
+        });
+      });
+
+    fetch('/api/sap/jobs')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.jobs)) {
+          setSapJobs(data.jobs);
+        }
+      })
+      .catch(() => {});
+
     if (typeof window !== 'undefined') {
       // Profile
       const storedProfile = localStorage.getItem('openability_candidate');
@@ -74,6 +113,9 @@ export default function JobsPage() {
       if (detail.remoteOnly || detail.remote) {
         setWorkTypeFilter('REMOTE');
       }
+      if (detail.sapOnly) {
+        setSourceFilter('SAP');
+      }
     };
 
     const handleVoiceAction = (e: Event) => {
@@ -81,7 +123,9 @@ export default function JobsPage() {
       const cmd = detail.command;
       const idx = detail.index ?? 0;
 
-      const calculated = seedJobs.map(job => {
+      const allCombinedJobs = [...seedJobs, ...sapJobs];
+
+      const calculated = allCombinedJobs.map(job => {
         const match = matchingService.calculateMatch(
           candidate.profile,
           candidate.accessibility,
@@ -91,7 +135,7 @@ export default function JobsPage() {
         return { job, match };
       });
       
-      const filtered = calculated.filter(({ job, match }) => {
+      const filtered = calculated.filter(({ job }) => {
         const titleMatch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            job.company.toLowerCase().includes(searchTerm.toLowerCase());
         const workTypeMatch = workTypeFilter === 'ALL' || job.workType === workTypeFilter;
@@ -117,7 +161,7 @@ export default function JobsPage() {
       window.removeEventListener('voice-job-search', handleVoiceSearch);
       window.removeEventListener('voice-job-action', handleVoiceAction);
     };
-  }, [candidate, searchTerm, workTypeFilter, savedJobs, appliedJobs]);
+  }, [candidate, searchTerm, workTypeFilter, savedJobs, appliedJobs, sapJobs]);
 
   const toggleSave = (jobId: string) => {
     let nextSaved = [...savedJobs];
@@ -135,11 +179,14 @@ export default function JobsPage() {
     const nextApplied = [...appliedJobs, jobId];
     setAppliedJobs(nextApplied);
     localStorage.setItem('openability_applied_jobs', JSON.stringify(nextApplied));
-    alert(`Successfully applied to job at ${companyName}!`);
+    alert(`Successfully applied to position at ${companyName}!`);
   };
 
+  // Combine seed jobs with SAP SuccessFactors synchronized jobs
+  const allJobs = [...sapJobs, ...seedJobs];
+
   // Perform dynamic matching score vectors calculations for all jobs
-  const jobsWithCalculatedMatches = seedJobs.map(job => {
+  const jobsWithCalculatedMatches = allJobs.map(job => {
     const match = matchingService.calculateMatch(
       candidate.profile,
       candidate.accessibility,
@@ -151,31 +198,76 @@ export default function JobsPage() {
 
   // Filter listings
   const filteredMatches = jobsWithCalculatedMatches.filter(({ job, match }) => {
+    const isSapJob = job.id.startsWith('sap_');
+    const sourceMatch = sourceFilter === 'ALL' || (sourceFilter === 'SAP' && isSapJob) || (sourceFilter === 'DIRECT' && !isSapJob);
+
     const titleMatch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        job.company.toLowerCase().includes(searchTerm.toLowerCase());
     
     const roleMatch = roleFilter === 'ALL' || job.title.toLowerCase().includes(roleFilter.toLowerCase());
     
     const skillMatch = skillFilter === 'ALL' || 
-                       job.skills?.some(js => js.skill?.name.toLowerCase() === skillFilter.toLowerCase());
+                       job.skills?.some((js: any) => js.skill?.name.toLowerCase() === skillFilter.toLowerCase());
     
     const workTypeMatch = workTypeFilter === 'ALL' || job.workType === workTypeFilter;
     
     const matchScoreOk = match.overallScore >= minMatchScore;
     const readinessScoreOk = (job.accessibility?.readinessScore || 0) >= minReadinessScore;
 
-    return titleMatch && roleMatch && skillMatch && workTypeMatch && matchScoreOk && readinessScoreOk;
+    return sourceMatch && titleMatch && roleMatch && skillMatch && workTypeMatch && matchScoreOk && readinessScoreOk;
   });
 
   return (
     <div className="space-y-6">
       
-      {/* Title */}
-      <div className="space-y-1.5">
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Ability-First Matching</h2>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-          OpenAbility AI matches your professional capabilities and accessibility needs against employer configurations.
-        </p>
+      {/* SAP Status Banner */}
+      <div className={`p-4 rounded-2xl border text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+        sapStatus.isConnected
+          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+          : 'bg-slate-900 border-slate-800 text-slate-300'
+      }`}>
+        <div className="flex items-center gap-2.5">
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${sapStatus.isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
+          <div>
+            <span className="font-extrabold uppercase tracking-wider text-[11px] block">
+              {sapStatus.isConnected ? 'SAP SuccessFactors Synchronized' : 'SAP Integration Mode'}
+            </span>
+            <p className="text-[11px] text-slate-400 font-medium">
+              {sapStatus.message}
+            </p>
+          </div>
+        </div>
+
+        {/* Source filter selector tabs */}
+        <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 self-stretch sm:self-auto">
+          <button
+            onClick={() => setSourceFilter('ALL')}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition cursor-pointer ${
+              sourceFilter === 'ALL' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            All Jobs ({allJobs.length})
+          </button>
+          <button
+            onClick={() => setSourceFilter('SAP')}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition cursor-pointer flex items-center gap-1 ${
+              sourceFilter === 'SAP' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <span>SAP Requisitions</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-900 text-cyan-300 font-bold">
+              {sapJobs.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setSourceFilter('DIRECT')}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-extrabold transition cursor-pointer ${
+              sourceFilter === 'DIRECT' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            OpenAbility Direct
+          </button>
+        </div>
       </div>
 
       {/* Filter Toolbar Grid */}
@@ -186,7 +278,7 @@ export default function JobsPage() {
             <Search className="w-4 h-4 text-emerald-400 absolute left-3" />
             <input
               type="text"
-              placeholder="Search positions or companies..."
+              placeholder="Search positions, SAP job codes, or companies..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white font-medium placeholder-slate-400 dark:placeholder-slate-500"
@@ -278,6 +370,7 @@ export default function JobsPage() {
           filteredMatches.map(({ job, match }) => {
             const hasSaved = savedJobs.includes(job.id);
             const hasApplied = appliedJobs.includes(job.id);
+            const isSapJob = job.id.startsWith('sap_');
 
             return (
               <div 
@@ -288,6 +381,11 @@ export default function JobsPage() {
                 <div className="p-6 space-y-4">
                   <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1 min-w-0">
+                      {isSapJob && (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-1">
+                          SAP SuccessFactors OData
+                        </span>
+                      )}
                       <h3 className="font-black text-base text-slate-900 dark:text-white truncate">
                         {job.title}
                       </h3>

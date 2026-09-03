@@ -124,17 +124,24 @@ export default function CandidateProfilePage() {
   return (
     <div className="space-y-6">
       
-      {/* Title */}
-      <div className="space-y-1.5">
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Accessibility & Profile settings</h2>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-          Modify your communication preference, workspace configuration, and required assistive accommodations.
-        </p>
+      {/* Title & SAP Integration Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Accessibility & Profile settings</h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
+            Modify your communication preference, workspace configuration, and required assistive accommodations.
+          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs shrink-0 self-start sm:self-auto">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-[11px] font-extrabold text-cyan-300">SAP SuccessFactors Ready</span>
+        </div>
       </div>
 
       {saved && (
         <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold text-xs animate-in fade-in slide-in-from-top-2">
-          🎉 Accessibility profile saved successfully! Matches and AI career outputs have updated.
+          🎉 Accessibility profile saved successfully! Matches, SAP integration, and AI outputs have updated.
         </div>
       )}
 

@@ -962,7 +962,7 @@
       "tokenHash": "4c499dcefedb908ccdff41296848e755f39bd862e9bb3825e248cee16e548d91",
       "createdAt": "2026-09-02T18:00:29.776Z",
       "expiresAt": "2026-09-09T18:00:29.776Z",
-      "lastUsedAt": "2026-09-03T04:47:48.907Z",
+      "lastUsedAt": "2026-09-03T05:24:53.909Z",
       "revokedAt": null
     },
     {
@@ -971,8 +971,8 @@
       "tokenHash": "a92197d9458a829bfc71125a0c93f0ef76794653400d8318bf687c54b1d23adf",
       "createdAt": "2026-09-02T18:39:41.829Z",
       "expiresAt": "2026-09-09T18:39:41.829Z",
-      "lastUsedAt": "2026-09-03T04:58:30.801Z",
-      "revokedAt": null
+      "lastUsedAt": "2026-09-03T05:29:41.614Z",
+      "revokedAt": "2026-09-03T05:29:43.582Z"
     },
     {
       "id": "337207df-1dc7-4da8-8811-4273cd813982",
@@ -981,6 +981,15 @@
       "createdAt": "2026-09-02T19:07:43.886Z",
       "expiresAt": "2026-09-09T19:07:43.886Z",
       "lastUsedAt": "2026-09-02T19:14:03.189Z",
+      "revokedAt": null
+    },
+    {
+      "id": "88daada4-b3b2-441e-8ec3-3e4350c8a65c",
+      "userId": "b9df56f2-0865-4c47-8432-5f571b10c03f",
+      "tokenHash": "5691175cfa4eb8b3d3af04988c642b26ff107dfc7333254e727ef9e844d01809",
+      "createdAt": "2026-09-03T05:31:05.639Z",
+      "expiresAt": "2026-09-10T05:31:05.639Z",
+      "lastUsedAt": "2026-09-03T05:31:05.719Z",
       "revokedAt": null
     }
   ],
