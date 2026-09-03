@@ -411,11 +411,11 @@ ${report.certifications.extracted.map(c => `- ${c.name} ${c.issuingOrganization 
     <div className="space-y-6">
       
       {/* Title */}
-      <div className="space-y-1">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-emerald-500" /> Resume Intelligence & 13-Section AI Audit
+      <div className="space-y-1.5">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2.5 tracking-tight">
+          <Sparkles className="w-7 h-7 text-emerald-400 shrink-0" /> Resume Intelligence & 13-Section AI Audit
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium max-w-3xl">
           Upload your resume file to run real AI content parsing, ATS score auditing, vulnerability detection, and voice narration.
         </p>
       </div>
@@ -425,8 +425,8 @@ ${report.certifications.extracted.map(c => `- ${c.name} ${c.issuingOrganization 
         
         {/* Upload & Sample Scanner Column (4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-800 dark:text-white text-xs sm:text-sm uppercase tracking-wider">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
+            <h3 className="font-extrabold border-b border-slate-100 dark:border-slate-800 pb-3 text-slate-900 dark:text-white text-xs sm:text-sm uppercase tracking-wider">
               Upload Resume Document
             </h3>
 
@@ -448,15 +448,15 @@ ${report.certifications.extracted.map(c => `- ${c.name} ${c.issuingOrganization 
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition select-none ${
                 dragActive 
-                  ? 'border-emerald-500 bg-emerald-50/10' 
-                  : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 hover:bg-slate-50 dark:hover:bg-slate-850'
+                  ? 'border-emerald-400 bg-emerald-500/10' 
+                  : 'border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950/60 hover:bg-slate-100 dark:hover:bg-slate-850'
               }`}
             >
-              <UploadCloud className="w-12 h-12 text-slate-400 mb-3" />
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+              <UploadCloud className="w-12 h-12 text-emerald-400 mb-3" />
+              <p className="text-xs font-black text-slate-900 dark:text-white">
                 Click or drag resume here
               </p>
-              <p className="text-[10px] text-slate-400 mt-1">
+              <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300 mt-1">
                 PDF, DOCX, or TXT up to 10MB
               </p>
             </div>

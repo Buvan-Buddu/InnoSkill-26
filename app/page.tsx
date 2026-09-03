@@ -24,6 +24,7 @@ export default function Home() {
     status, 
     feedback, 
     startZeroTouchVoiceEntry, 
+    startAgentListening,
     handleVoiceModeDecision,
     handleLanguageDecision,
     handleAuthMethodDecision,
@@ -88,9 +89,14 @@ export default function Home() {
         >
           <div className="bg-slate-900 border-2 border-emerald-500/40 p-8 sm:p-10 rounded-3xl max-w-lg w-full space-y-6 text-center shadow-2xl shadow-emerald-500/10 animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto text-emerald-400">
-              <Mic className={`w-7 h-7 ${status === 'LISTENING' ? 'animate-bounce text-emerald-400' : 'animate-pulse'}`} />
-            </div>
+            <button 
+              onClick={() => startAgentListening()} 
+              className="w-16 h-16 bg-emerald-500/10 border-2 border-emerald-500/40 hover:bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto text-emerald-400 cursor-pointer transition focus:outline-none focus:ring-4 focus:ring-emerald-400"
+              title="Click to start or restart voice listening"
+              aria-label="Click to start or restart voice listening"
+            >
+              <Mic className={`w-8 h-8 ${status === 'LISTENING' ? 'animate-bounce text-emerald-400' : 'animate-pulse text-emerald-300'}`} />
+            </button>
 
             <div className="space-y-2">
               <h3 id="multimodal-modal-title" className="text-2xl font-black text-white tracking-tight">
@@ -178,7 +184,9 @@ export default function Home() {
                   🎙 Listening... Say your choice or click an option.
                 </p>
               ) : (
-                <p>You can say your choice or select an option.</p>
+                <p className="text-amber-400 font-semibold">
+                  Click microphone icon or say your choice.
+                </p>
               )}
               <p className="text-slate-300 text-[11px] font-medium">{feedback}</p>
             </div>

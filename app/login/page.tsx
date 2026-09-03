@@ -98,18 +98,18 @@ export default function LoginPage() {
       {/* Login Card */}
       <main className="max-w-md mx-auto w-full space-y-6 my-auto z-10 py-8">
         
-        <div className="bg-slate-900/80 border border-slate-850 p-8 rounded-3xl space-y-6 shadow-2xl backdrop-blur-md">
+        <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-2xl backdrop-blur-md">
           <div className="space-y-2 text-center">
-            <span className="text-[10px] text-emerald-400 font-extrabold uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+            <span className="text-[11px] text-emerald-400 font-black uppercase tracking-widest bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/30">
               Welcome Back
             </span>
-            <h2 className="text-2xl font-black tracking-tight text-white pt-1">Log in to OpenAbility</h2>
-            <p className="text-xs text-slate-400">Access your saved career profile, resume, and interview history.</p>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white pt-1">Log in to OpenAbility</h2>
+            <p className="text-xs text-slate-300 font-medium">Access your saved career profile, resume, and interview history.</p>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold text-center animate-in fade-in duration-200">
-              {error}
+            <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-bold text-center animate-in fade-in duration-200">
+              ⚠️ {error}
             </div>
           )}
 
@@ -117,11 +117,11 @@ export default function LoginPage() {
             
             {/* Email Address */}
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              <label htmlFor="email" className="text-xs font-extrabold text-slate-200 uppercase tracking-wider block">
                 Email Address <span className="text-emerald-400">*</span>
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4.5 h-4.5 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   id="email"
                   type="email"
@@ -129,7 +129,7 @@ export default function LoginPage() {
                   placeholder="rahul@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none text-white font-medium placeholder-slate-600"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none text-white font-semibold placeholder-slate-500"
                 />
               </div>
             </div>
@@ -137,15 +137,15 @@ export default function LoginPage() {
             {/* Password */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label htmlFor="password" className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                <label htmlFor="password" className="text-xs font-extrabold text-slate-200 uppercase tracking-wider block">
                   Password <span className="text-emerald-400">*</span>
                 </label>
-                <Link href="/forgot-password" className="text-[10px] text-emerald-400 font-bold hover:underline">
+                <Link href="/forgot-password" className="text-xs text-emerald-400 font-extrabold hover:underline">
                   Forgot Password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4.5 h-4.5 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   id="password"
                   type="password"
@@ -153,7 +153,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none text-white font-medium placeholder-slate-600"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none text-white font-semibold placeholder-slate-500"
                 />
               </div>
             </div>
@@ -161,16 +161,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               {submitting ? 'Authenticating...' : 'Log In'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="text-center pt-2 border-t border-slate-850 text-xs text-slate-400">
+          <div className="text-center pt-3 border-t border-slate-800 text-xs text-slate-300 font-medium">
             Don't have an account?{' '}
-            <Link href="/signup" className="text-emerald-400 font-extrabold hover:underline">
+            <Link href="/signup" className="text-emerald-400 font-black hover:underline">
               Create Account
             </Link>
           </div>
@@ -178,7 +178,7 @@ export default function LoginPage() {
 
       </main>
 
-      <footer className="max-w-md mx-auto w-full text-center text-[10px] text-slate-500 z-10">
+      <footer className="max-w-md mx-auto w-full text-center text-[11px] text-slate-400 font-semibold z-10">
         HttpOnly Session Security · Server Derived Authentication
       </footer>
     </div>

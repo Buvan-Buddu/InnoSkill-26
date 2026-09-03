@@ -116,20 +116,38 @@ export class WebSpeechService implements SpeechService {
     utterance.pitch = 1.0;
 
     if (onEnd) {
-      utterance.onend = () => {
-        onEnd();
+      let called = false;
+      const safeOnEnd = () => {
+        if (!called) {
+          called = true;
+          if (timeoutId) clearTimeout(timeoutId);
+          onEnd();
+        }
       };
-      utterance.onerror = () => {
-        onEnd();
-      };
+
+      utterance.onend = safeOnEnd;
+      utterance.onerror = safeOnEnd;
+
+      // Fallback timeout in case browser TTS onend never fires (min 1.5s, max 8s)
+      const durationMs = Math.min(8000, Math.max(1500, (text.length / 10) * 1000));
+      const timeoutId = setTimeout(safeOnEnd, durationMs);
     }
 
-    this.synth.speak(utterance);
+    try {
+      this.synth.speak(utterance);
+    } catch (e) {
+      console.warn('⚠️ [WebSpeech] Speech synthesis speak error:', e);
+      if (onEnd) onEnd();
+    }
   }
 
   stopSpeaking(): void {
     if (this.synth) {
-      this.synth.cancel();
+      try {
+        this.synth.cancel();
+      } catch (e) {
+        // Ignore cancel errors
+      }
     }
   }
 
@@ -177,14 +195,15 @@ export class WebSpeechService implements SpeechService {
       this.isListening = false;
       const errName = event.error || event;
       console.log(`%c⚠️ [WebSpeech] Recognition Event: ${errName}`, 'color: #EF4444;');
-      if (errName === 'no-speech' || errName === 'aborted' || errName === 'network') {
-        return; // Ignore benign errors gracefully
-      }
       if (onError) onError(errName);
     };
 
     this.recognition.onend = () => {
+      const wasListening = this.isListening;
       this.isListening = false;
+      if (wasListening && onError) {
+        onError('end');
+      }
     };
 
     try {

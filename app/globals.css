@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #030712;
+  --foreground: #f8fafc;
+  --card-bg: #0f172a;
+  --card-border: #334155;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent-emerald: #10b981;
+  --accent-cyan: #06b6d4;
+  --focus-ring: #10b981;
 }
 
 @theme inline {
@@ -12,25 +20,29 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
 }
 
-/* Custom Accessibility Rules */
+/* Universal WCAG 2.2 AA Keyboard Focus Rings */
+:focus-visible {
+  outline: 3px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.35) !important;
+}
 
 /* High Contrast Mode Override */
 .dark-contrast {
   --background: #000000 !important;
   --foreground: #ffffff !important;
+  --card-bg: #000000 !important;
+  --card-border: #ffffff !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #ffffff !important;
+  --text-muted: #ffffff !important;
 }
 
 .dark-contrast body {

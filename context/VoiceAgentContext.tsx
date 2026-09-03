@@ -509,7 +509,7 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
 
     setStatus('LISTENING');
     setTranscript('');
-    setFeedback("Listening...");
+    setFeedback("Listening... Say your choice or click an option.");
 
     speechService.startListening(
       (result) => {
@@ -523,18 +523,28 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
       (err) => {
         if (expectedId && transitionIdRef.current !== expectedId) return;
 
-        if (err === 'no-speech' || err === 'network' || err === 'aborted') {
+        if (err === 'no-speech' || err === 'network' || err === 'aborted' || err === 'end') {
           if (entryState === 'VOICE_MODE_QUESTION' || entryState === 'LANGUAGE_QUESTION' || entryState === 'AUTH_METHOD_QUESTION') {
-            const retryMsg = "I didn't catch that. Please try again.";
-            speakQuestionThenListen(retryMsg, entryState);
+            // Keep listening continuously for the user's spoken answer
+            setTimeout(() => {
+              if (expectedId && transitionIdRef.current !== expectedId) return;
+              startAgentListeningWithId(expectedId);
+            }, 300);
             return;
           }
           setStatus('IDLE');
           setFeedback("Ask OpenAbility");
           return;
         }
+
+        if (err === 'not-allowed' || err === 'service-not-allowed') {
+          setStatus('ERROR');
+          setFeedback("Microphone access waiting or blocked. Please allow mic or click an option.");
+          return;
+        }
+
         setStatus('ERROR');
-        setFeedback("I didn't catch that. Please try again or say 'Help'.");
+        setFeedback("I didn't catch that. Please try again or click an option.");
         speakFeedback("I didn't catch that. Please try again.");
       }
     );

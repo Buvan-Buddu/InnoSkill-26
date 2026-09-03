@@ -125,15 +125,15 @@ export default function CandidateProfilePage() {
     <div className="space-y-6">
       
       {/* Title */}
-      <div className="space-y-1">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white">Accessibility & Profile settings</h2>
-        <p className="text-xs sm:text-sm text-slate-500">
+      <div className="space-y-1.5">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Accessibility & Profile settings</h2>
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
           Modify your communication preference, workspace configuration, and required assistive accommodations.
         </p>
       </div>
 
       {saved && (
-        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-850 dark:text-emerald-300 font-semibold text-xs animate-in fade-in slide-in-from-top-2">
+        <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold text-xs animate-in fade-in slide-in-from-top-2">
           🎉 Accessibility profile saved successfully! Matches and AI career outputs have updated.
         </div>
       )}
@@ -145,75 +145,75 @@ export default function CandidateProfilePage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* General Profile Info */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-800 dark:text-white text-sm sm:text-base flex items-center gap-2">
-              <Smile className="w-5 h-5 text-emerald-500" /> Professional Details
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
+            <h3 className="font-black border-b border-slate-100 dark:border-slate-800 pb-3 text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+              <Smile className="w-5 h-5 text-emerald-400" /> Professional Details
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500">Full Name</label>
+                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Full Name</label>
                 <input
                   type="text"
                   name="fullName"
                   value={profile.fullName}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
                   required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500">Phone Contact</label>
+                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Phone Contact</label>
                 <input
                   type="text"
                   name="phone"
                   value={profile.phone || ''}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500">Experience Years</label>
+                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Experience Years</label>
                 <input
                   type="number"
                   name="experienceYears"
                   value={profile.experienceYears || 0}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500">Education Details</label>
+                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Education Details</label>
                 <input
                   type="text"
                   name="education"
                   value={profile.education || ''}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500">Professional Bio</label>
+              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Professional Bio</label>
               <textarea
                 name="bio"
                 value={profile.bio || ''}
                 onChange={handleProfileChange}
                 rows={4}
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
               />
             </div>
           </div>
 
           {/* Target Roles */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-855 pb-3 text-slate-800 dark:text-white text-sm sm:text-base">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
+            <h3 className="font-black border-b border-slate-100 dark:border-slate-800 pb-3 text-slate-900 dark:text-white text-sm sm:text-base">
               Target Career Roles
             </h3>
 
@@ -223,28 +223,28 @@ export default function CandidateProfilePage() {
                 placeholder="e.g. Frontend Lead, UI Dev"
                 value={targetRoleInput}
                 onChange={(e) => setTargetRoleInput(e.target.value)}
-                className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white placeholder-slate-400"
               />
               <button
                 type="button"
                 onClick={addRole}
-                className="px-4 py-2 bg-slate-900 dark:bg-emerald-600 dark:text-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-850 transition"
+                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-black transition"
               >
                 Add Role
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-1.5 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               {profile.targetRoles.map((role) => (
                 <span
                   key={role}
-                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-slate-50/50"
+                  className="flex items-center gap-1.5 text-xs font-extrabold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800"
                 >
                   {role}
                   <button
                     type="button"
                     onClick={() => removeRole(role)}
-                    className="text-slate-400 hover:text-red-500 transition font-bold"
+                    className="text-slate-400 hover:text-red-500 transition font-black ml-1 text-sm"
                   >
                     ×
                   </button>
@@ -258,19 +258,19 @@ export default function CandidateProfilePage() {
         {/* Right 1 Col: Accessibility Configurations */}
         <div className="space-y-6">
           
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-800 dark:text-white text-sm sm:text-base flex items-center gap-2">
-              <HeartHandshake className="w-5 h-5 text-emerald-500" /> Accommodations
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
+            <h3 className="font-black border-b border-slate-100 dark:border-slate-800 pb-3 text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+              <HeartHandshake className="w-5 h-5 text-emerald-400" /> Accommodations
             </h3>
 
             {/* Comm preference */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500">Communication Mode Preference</label>
+              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Communication Mode Preference</label>
               <select
                 name="communicationPreference"
                 value={acc.communicationPreference}
                 onChange={handleAccChange}
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
               >
                 <option value="TEXT">Text only (Async messages / transcripts)</option>
                 <option value="VOICE">Voice only (TTS synthesis / screen reading)</option>
@@ -280,12 +280,12 @@ export default function CandidateProfilePage() {
 
             {/* Work setting */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500">Work Setting Preference</label>
+              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Work Setting Preference</label>
               <select
                 name="workPreference"
                 value={acc.workPreference}
                 onChange={handleAccChange}
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
               >
                 <option value="REMOTE">Fully Remote</option>
                 <option value="HYBRID">Hybrid Model</option>
@@ -295,7 +295,7 @@ export default function CandidateProfilePage() {
 
             {/* Checklist */}
             <div className="space-y-3.5 pt-2">
-              <span className="text-xs font-bold text-slate-500 block border-b border-slate-100 dark:border-slate-850 pb-1">Sensory & Tech Accommodations</span>
+              <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200 block border-b border-slate-100 dark:border-slate-800 pb-1">Sensory & Tech Accommodations</span>
               
               <div className="space-y-2.5">
                 {[
@@ -308,13 +308,13 @@ export default function CandidateProfilePage() {
                   { name: 'flexibleHours', label: 'Require Flexible Working Hours' },
                   { name: 'keyboardNavigationOnly', label: 'Require Keyboard-Only Navigation' },
                 ].map((item) => (
-                  <label key={item.name} className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-350 cursor-pointer select-none">
+                  <label key={item.name} className="flex items-center gap-3 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       name={item.name}
                       checked={!!(acc as any)[item.name]}
                       onChange={handleAccChange}
-                      className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-400 focus:outline-none shrink-0"
+                      className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-emerald-500 focus:ring-emerald-400 focus:outline-none shrink-0"
                     />
                     <span>{item.label}</span>
                   </label>
@@ -323,8 +323,8 @@ export default function CandidateProfilePage() {
             </div>
 
             {/* Custom accommodations text */}
-            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-850">
-              <label className="text-xs font-bold text-slate-500 block">Custom Required Accommodations</label>
+            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 block">Custom Required Accommodations</label>
               
               <div className="flex gap-2">
                 <input
@@ -332,43 +332,43 @@ export default function CandidateProfilePage() {
                   placeholder="e.g. Ergonomic desk setup"
                   value={newAccommodation}
                   onChange={(e) => setNewAccommodation(e.target.value)}
-                  className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
+                  className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
                 />
                 <button
                   type="button"
                   onClick={addAcc}
-                  className="px-3 py-2 bg-slate-900 dark:bg-emerald-600 dark:text-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-850 transition"
+                  className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-black transition"
                 >
                   Add
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-1 pt-1.5">
+              <div className="flex flex-wrap gap-1.5 pt-1.5">
                 {acc.accommodations.map((item) => (
                   <span
                     key={item}
-                    className="flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 bg-slate-50"
+                    className="flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800"
                   >
                     {item}
                     <button
                       type="button"
                       onClick={() => removeAcc(item)}
-                      className="text-slate-400 hover:text-red-500 font-bold"
+                      className="text-slate-400 hover:text-red-500 font-black ml-1"
                     >
                       ×
-                  </button>
-                </span>
-              ))}
+                    </button>
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
 
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-2xl flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-lg shadow-emerald-500/10"
+            className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-lg shadow-emerald-500/20 text-xs sm:text-sm cursor-pointer"
           >
-            <Save className="w-4 h-4" /> Save Accessibility Settings
+            <Save className="w-4.5 h-4.5" /> Save Accessibility Settings
           </button>
         </div>
 

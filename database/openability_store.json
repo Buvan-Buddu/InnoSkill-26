@@ -377,6 +377,15 @@
       "role": "CANDIDATE",
       "createdAt": "2026-09-02T17:37:57.864Z",
       "updatedAt": "2026-09-02T17:37:57.864Z"
+    },
+    {
+      "id": "2d038ce5-0660-4675-8b0a-be8772849e51",
+      "email": "test@example.com",
+      "passwordHash": "e1c1537fe6c17bd0c4c803f073e858eedd301d9132a74d4bfb0cc1dda28069691a0db56956488def8d288b45d685812e24248dc69c9d3b2a3aa7fd7ec6ab4c3d",
+      "salt": "ad25d0c29c5e663f3e503939bdbbb5bdcb940c38892585158965137dc81b2a15",
+      "role": "CANDIDATE",
+      "createdAt": "2026-09-02T19:07:43.214Z",
+      "updatedAt": "2026-09-02T19:07:43.214Z"
     }
   ],
   "sessions": [
@@ -926,7 +935,7 @@
       "tokenHash": "448a830dc87ed483234d951e42c67ca669712b927420f9cf6a6db24c9c408c29",
       "createdAt": "2026-09-02T15:31:52.887Z",
       "expiresAt": "2026-09-09T15:31:52.887Z",
-      "lastUsedAt": "2026-09-02T15:31:53.186Z",
+      "lastUsedAt": "2026-09-02T19:17:46.513Z",
       "revokedAt": null
     },
     {
@@ -953,7 +962,7 @@
       "tokenHash": "4c499dcefedb908ccdff41296848e755f39bd862e9bb3825e248cee16e548d91",
       "createdAt": "2026-09-02T18:00:29.776Z",
       "expiresAt": "2026-09-09T18:00:29.776Z",
-      "lastUsedAt": "2026-09-02T18:00:51.040Z",
+      "lastUsedAt": "2026-09-03T04:47:48.907Z",
       "revokedAt": null
     },
     {
@@ -962,7 +971,16 @@
       "tokenHash": "a92197d9458a829bfc71125a0c93f0ef76794653400d8318bf687c54b1d23adf",
       "createdAt": "2026-09-02T18:39:41.829Z",
       "expiresAt": "2026-09-09T18:39:41.829Z",
-      "lastUsedAt": "2026-09-02T18:45:59.908Z",
+      "lastUsedAt": "2026-09-03T04:49:59.750Z",
+      "revokedAt": null
+    },
+    {
+      "id": "337207df-1dc7-4da8-8811-4273cd813982",
+      "userId": "2d038ce5-0660-4675-8b0a-be8772849e51",
+      "tokenHash": "24afb180490bb8bd99eec8cba53a23c8afeb6816404994227e61e87b0b958606",
+      "createdAt": "2026-09-02T19:07:43.886Z",
+      "expiresAt": "2026-09-09T19:07:43.886Z",
+      "lastUsedAt": "2026-09-02T19:14:03.189Z",
       "revokedAt": null
     }
   ],
@@ -1559,6 +1577,18 @@
       "onboardingStep": "NAME",
       "createdAt": "2026-09-02T17:37:57.864Z",
       "updatedAt": "2026-09-02T17:37:57.864Z"
+    },
+    {
+      "id": "6320d9ae-4be1-4e0c-8149-907ff18cfc43",
+      "userId": "2d038ce5-0660-4675-8b0a-be8772849e51",
+      "fullName": "Test User",
+      "targetRoles": [],
+      "experienceYears": null,
+      "education": "",
+      "onboardingCompleted": false,
+      "onboardingStep": "NAME",
+      "createdAt": "2026-09-02T19:07:43.214Z",
+      "updatedAt": "2026-09-02T19:07:43.214Z"
     }
   ],
   "accessibilityProfiles": [
@@ -2289,6 +2319,23 @@
       "accommodations": [],
       "createdAt": "2026-09-02T17:37:57.864Z",
       "updatedAt": "2026-09-02T17:37:57.864Z"
+    },
+    {
+      "id": "5fc96ed9-d7f4-4441-89eb-ea7be9814d7e",
+      "userId": "2d038ce5-0660-4675-8b0a-be8772849e51",
+      "communicationPreference": "VOICE",
+      "screenReaderRequired": false,
+      "highContrastRequired": false,
+      "largeTextRequired": false,
+      "captionsRequired": false,
+      "textCommunicationOnly": false,
+      "accessiblePhysicalSpace": false,
+      "workPreference": "REMOTE",
+      "flexibleHours": false,
+      "sharingPreferences": false,
+      "accommodations": [],
+      "createdAt": "2026-09-02T19:07:43.214Z",
+      "updatedAt": "2026-09-02T19:07:43.214Z"
     }
   ],
   "resumes": [
@@ -5849,6 +5896,15 @@
       "voiceIndex": 0,
       "voiceEnabled": true,
       "updatedAt": "2026-09-02T17:37:57.864Z"
+    },
+    {
+      "id": "d3ff2133-35ff-4451-bcc2-50bc2956bc5e",
+      "userId": "2d038ce5-0660-4675-8b0a-be8772849e51",
+      "voiceLocale": "en-IN",
+      "speechRate": 0.95,
+      "voiceIndex": 0,
+      "voiceEnabled": true,
+      "updatedAt": "2026-09-02T19:07:43.214Z"
     }
   ]
 }
