@@ -95,7 +95,7 @@ export class AgenticCareerOrchestrator {
       return {
         activeAgent: 'ORCHESTRATOR',
         query,
-        response: "Welcome to OpenAbility! I don't have your career information yet. You can say 'Start onboarding' to set up your profile through voice, or ask me any question.",
+        response: "Welcome to InnoSkill AI! I don't have your career information yet. You can say 'Start onboarding' to set up your profile through voice, or ask me any question.",
         data: { missingData: true }
       };
     }

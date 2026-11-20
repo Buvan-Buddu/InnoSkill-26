@@ -3,7 +3,7 @@ export const GEMINI_LIVE_TOOLS = [
     function_declarations: [
       {
         name: 'submitVoiceModeDecision',
-        description: 'Record user decision on whether to use OpenAbility with voice mode.',
+        description: 'Record user decision on whether to use InnoSkill AI with voice mode.',
         parameters: {
           type: 'OBJECT',
           properties: {
@@ -14,7 +14,7 @@ export const GEMINI_LIVE_TOOLS = [
       },
       {
         name: 'submitLanguageDecision',
-        description: 'Record user language selection for OpenAbility.',
+        description: 'Record user language selection for InnoSkill AI.',
         parameters: {
           type: 'OBJECT',
           properties: {

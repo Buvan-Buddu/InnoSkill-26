@@ -2,22 +2,26 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { demoCandidate, seedJobs } from '@/database/seed-data';
+import { seedJobs } from '@/database/seed-data';
 import { matchingService } from '@/services/matching';
 import { 
   Building2, 
   Plus, 
-  Accessibility, 
   Users, 
   TrendingUp, 
   ShieldCheck, 
-  CheckCircle,
-  HelpCircle,
-  Clock,
-  Sparkles,
+  CheckCircle2, 
   ArrowRight,
-  Info
+  Briefcase,
+  SlidersHorizontal,
+  PlusCircle,
+  Check
 } from 'lucide-react';
+import InnoSkillLogo from '@/components/brand/InnoSkillLogo';
+import SurfaceCard from '@/components/ui/SurfaceCard';
+import StatCard from '@/components/ui/StatCard';
+import StatusBadge from '@/components/ui/StatusBadge';
+import ProgressBar from '@/components/ui/ProgressBar';
 
 interface EmployerJob {
   id: string;
@@ -62,7 +66,6 @@ export default function EmployerDashboard() {
   const [physicalAccessibility, setPhysicalAccessibility] = useState(false);
   const [assistiveTechnologySupport, setAssistiveTechnologySupport] = useState(true);
 
-  // Load Seeded positions on mount
   useEffect(() => {
     const formattedSeedJobs: EmployerJob[] = seedJobs.slice(0, 4).map(sj => ({
       id: sj.id,
@@ -92,7 +95,6 @@ export default function EmployerDashboard() {
     }
   }, []);
 
-  // Compute dynamic readiness score
   const calculateReadinessScore = () => {
     const checks = [
       remoteAvailable,
@@ -104,26 +106,25 @@ export default function EmployerDashboard() {
       physicalAccessibility,
       assistiveTechnologySupport
     ];
-    const yesCount = checks.filter(Boolean).length;
-    return Math.round((yesCount / checks.length) * 100);
+    const trueCount = checks.filter(Boolean).length;
+    return Math.round((trueCount / checks.length) * 100);
   };
 
   const currentReadinessScore = calculateReadinessScore();
 
-  // Create Job Position
   const handleCreateJob = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
 
     const newJob: EmployerJob = {
-      id: 'job-' + Date.now(),
+      id: `job-${Date.now()}`,
       title,
-      company: 'Vidhwan Labs',
+      company: 'Enterprise Partner Corp',
       description,
       workType,
-      requirements: 'Experience building applications. Good communication and collaboration skills.',
-      location: 'Remote (US/Canada)',
-      skills: skillsRequired.split(',').map(s => s.trim()).filter(Boolean),
+      requirements: `Experience: ${experienceRequired}+ years in relevant field.`,
+      location: workType === 'REMOTE' ? 'Remote Worldwide' : 'Tech Hub Campus',
+      skills: skillsRequired ? skillsRequired.split(',').map(s => s.trim()) : ['React', 'Accessibility'],
       accessibility: {
         remoteAvailable,
         flexibleHours,
@@ -141,7 +142,6 @@ export default function EmployerDashboard() {
     setJobs(nextJobs);
     setSelectedJobId(newJob.id);
 
-    // Reset Form
     setTitle('');
     setDescription('');
     setSkillsRequired('');
@@ -149,197 +149,83 @@ export default function EmployerDashboard() {
     setScreenReaderCompatible(false);
     setCaptionSupport(false);
     setPhysicalAccessibility(false);
-    alert(`Successfully created job "${newJob.title}" with a ${currentReadinessScore}% Accessibility Readiness Score!`);
+    alert(`Successfully posted job "${newJob.title}" with a ${currentReadinessScore}% Accessibility Readiness Score!`);
   };
 
   const selectedJob = jobs.find(j => j.id === selectedJobId) || jobs[0];
 
-  // Mock candidates database for matching
   const mockCandidates = [
     {
-      name: 'Candidate A (Alex R.)',
-      skills: ['React', 'TypeScript', 'Web Accessibility', 'HTML5', 'CSS3', 'Git'],
-      experienceYears: 4,
-      accessibility: {
-        workPreference: 'REMOTE' as const,
-        communicationPreference: 'TEXT' as const,
-        screenReaderRequired: false,
-        highContrastRequired: true,
-        largeTextRequired: true,
-        captionsRequired: false,
-        textCommunicationOnly: true,
-        accessiblePhysicalSpace: false,
-        flexibleHours: true,
-        keyboardNavigationOnly: false,
-        accommodations: ['Text Communication Only', 'Flexible Hours', 'High Contrast Layouts']
-      }
+      name: 'Alex Rivera',
+      role: 'Frontend UI Specialist',
+      skills: ['React', 'TypeScript', 'Web Accessibility (WCAG)', 'HTML5', 'CSS3'],
+      score: 94,
+      accommodations: ['Text Communication Only', 'Flexible Working Hours']
     },
     {
-      name: 'Candidate B (Taylor S.)',
-      skills: ['Python', 'SQL', 'Machine Learning', 'Data Analysis', 'Docker'],
-      experienceYears: 3,
-      accessibility: {
-        workPreference: 'REMOTE' as const,
-        communicationPreference: 'VOICE' as const,
-        screenReaderRequired: true,
-        highContrastRequired: false,
-        largeTextRequired: false,
-        captionsRequired: false,
-        textCommunicationOnly: false,
-        accessiblePhysicalSpace: false,
-        flexibleHours: false,
-        keyboardNavigationOnly: true,
-        accommodations: ['Screen Reader Compatible', 'Keyboard-Only Navigation']
-      }
+      name: 'Taylor Sharma',
+      role: 'Software Developer',
+      skills: ['Python', 'SQL', 'FastAPI', 'Data Analytics', 'Docker'],
+      score: 88,
+      accommodations: ['Screen Reader Compatible', 'Keyboard-Only Navigation']
     },
     {
-      name: 'Candidate C (Jordan M.)',
-      skills: ['JavaScript', 'HTML5', 'CSS3', 'WordPress', 'SEO'],
-      experienceYears: 2,
-      accessibility: {
-        workPreference: 'HYBRID' as const,
-        communicationPreference: 'SIGN_LANGUAGE' as const,
-        screenReaderRequired: false,
-        highContrastRequired: false,
-        largeTextRequired: false,
-        captionsRequired: true,
-        textCommunicationOnly: false,
-        accessiblePhysicalSpace: true,
-        flexibleHours: true,
-        keyboardNavigationOnly: false,
-        accommodations: ['Caption Support', 'Wheelchair Physical Space', 'Flexible Working Hours']
-      }
+      name: 'Jordan Miller',
+      role: 'Full Stack Engineer',
+      skills: ['JavaScript', 'Node.js', 'PostgreSQL', 'Accessibility Testing'],
+      score: 82,
+      accommodations: ['Caption Support', 'Wheelchair Physical Space']
     }
   ];
 
-  // Calculate Matches dynamically for selected job
-  const getCandidateMatches = () => {
-    if (!selectedJob) return [];
-
-    // Map back to schema shape for calculator
-    const dummyJobSchema = {
-      id: selectedJob.id,
-      title: selectedJob.title,
-      company: selectedJob.company,
-      description: selectedJob.description,
-      requirements: selectedJob.requirements,
-      location: selectedJob.location,
-      workType: selectedJob.workType,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      skills: selectedJob.skills.map(s => ({
-        id: s,
-        jobId: selectedJob.id,
-        skillId: s,
-        skill: { id: s, name: s },
-        isRequired: true,
-        importance: 1
-      })),
-      accessibility: {
-        id: selectedJob.id,
-        jobId: selectedJob.id,
-        remoteAvailable: selectedJob.accessibility.remoteAvailable,
-        flexibleHours: selectedJob.accessibility.flexibleHours,
-        screenReaderCompatible: selectedJob.accessibility.screenReaderCompatible,
-        captionSupport: selectedJob.accessibility.captionSupport,
-        textCommunication: selectedJob.accessibility.textCommunication,
-        accessibleInterview: selectedJob.accessibility.accessibleInterview,
-        physicalAccessibility: selectedJob.accessibility.physicalAccessibility,
-        assistiveTechnologySupport: selectedJob.accessibility.assistiveTechnologySupport,
-        readinessScore: selectedJob.accessibility.readinessScore
-      }
-    };
-
-    return mockCandidates.map(c => {
-      // Create Candidate Profiles
-      const cProfile = {
-        id: c.name,
-        userId: c.name,
-        fullName: c.name,
-        targetRoles: ['Engineer', 'Developer'],
-        experienceYears: c.experienceYears,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      const cAcc = {
-        id: c.name,
-        candidateProfileId: c.name,
-        communicationPreference: c.accessibility.communicationPreference,
-        screenReaderRequired: c.accessibility.screenReaderRequired,
-        highContrastRequired: c.accessibility.highContrastRequired,
-        largeTextRequired: c.accessibility.largeTextRequired,
-        captionsRequired: c.accessibility.captionsRequired,
-        textCommunicationOnly: c.accessibility.textCommunicationOnly,
-        accessiblePhysicalSpace: c.accessibility.accessiblePhysicalSpace,
-        workPreference: c.accessibility.workPreference,
-        flexibleHours: c.accessibility.flexibleHours,
-        keyboardNavigationOnly: c.accessibility.keyboardNavigationOnly,
-        accommodations: c.accessibility.accommodations,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      const match = matchingService.calculateMatch(cProfile, cAcc, c.skills, dummyJobSchema);
-      return {
-        name: c.name,
-        skills: c.skills,
-        experienceYears: c.experienceYears,
-        score: match.overallScore
-      };
-    }).sort((a, b) => b.score - a.score);
-  };
-
-  const matches = getCandidateMatches();
-
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-h-screen bg-[#F7F9FC] text-[#172033] p-4 sm:p-6 lg:p-8 space-y-6 select-none bg-pearl-grid">
       
       {/* Top Navbar */}
-      <div className="flex justify-between items-center bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 shadow-md">
-        <Link href="/" className="flex items-center gap-3 group hover:opacity-90 transition cursor-pointer select-none" aria-label="Go to Home page">
-          <img 
-            src="/logo/logo.jpeg" 
-            alt="OpenAbility AI Logo" 
-            className="w-8 h-8 rounded-lg object-cover border border-emerald-500/30 group-hover:border-emerald-400 transition" 
-          />
-          <div>
-            <h1 className="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">
-              OpenAbility AI
-            </h1>
-            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Employer Workspace</p>
+      <header className="flex justify-between items-center bg-white p-4 sm:p-5 rounded-2xl border border-[#DCE5F0] shadow-sm">
+        <Link href="/" className="flex items-center gap-3 group hover:opacity-95 transition cursor-pointer select-none" aria-label="Go to Home page">
+          <InnoSkillLogo variant="header" size="md" />
+          <div className="hidden sm:block border-l border-[#DCE5F0] pl-3">
+            <p className="text-[10px] text-[#2F6FED] font-bold uppercase tracking-wider">Enterprise Employer Portal</p>
           </div>
         </Link>
         <Link 
           href="/dashboard"
-          className="text-xs font-bold px-4 py-2 border border-slate-700 hover:bg-slate-800 rounded-xl transition"
+          className="button-secondary text-xs !py-2 !min-h-9"
         >
-          Candidate Dashboard
+          Candidate Command Center
         </Link>
-      </div>
+      </header>
 
-      {/* Main Grid splits */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Overview Stat Cards */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Open Requisitions" value={jobs.length} detail="Live on platform" icon={Briefcase} />
+        <StatCard label="Matched Candidates" value="48" detail="Qualified talent pool" icon={Users} />
+        <StatCard label="Avg Accessibility Score" value={`${selectedJob?.accessibility.readinessScore || 85}%`} detail="WCAG compliant" icon={ShieldCheck} />
+        <StatCard label="Placement Velocity" value="14 Days" detail="35% faster hire" icon={TrendingUp} />
+      </section>
+
+      {/* Main Grid: Job Vacancies / Candidates & Job Creation */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left Column: Roles list & matches (7 Cols) */}
+        {/* Left Column: Requisitions & Ranked Candidates (7 Cols) */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Roles header selection tabs */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-855 pb-3 text-slate-850 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-              <Users className="w-4.5 h-4.5 text-emerald-500" /> Active Job Vacancies
+          {/* Vacancy Selector Card */}
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2 flex items-center gap-2">
+              <Users className="w-4 h-4 text-[#2F6FED]" /> Active Position Requisitions
             </h3>
 
-            {/* List selector */}
-            <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
               {jobs.map(j => (
                 <button
                   key={j.id}
                   onClick={() => setSelectedJobId(j.id)}
-                  className={`px-3.5 py-2 border rounded-xl text-xs font-bold transition shrink-0 focus:outline-none ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer border ${
                     selectedJobId === j.id
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 font-extrabold'
-                      : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850'
+                      ? 'bg-[#EAF2FF] border-[#2F6FED] text-[#2F6FED]'
+                      : 'bg-[#F7F9FC] border-[#DCE5F0] text-[#4B5870] hover:bg-[#F1F5FA]'
                   }`}
                 >
                   {j.title}
@@ -348,194 +234,173 @@ export default function EmployerDashboard() {
             </div>
 
             {selectedJob && (
-              <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-850 space-y-3.5">
-                <div className="flex justify-between items-start gap-4">
+              <div className="p-4 rounded-xl bg-[#F7F9FC] border border-[#EAF0F6] space-y-2 text-xs">
+                <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-bold text-slate-800 dark:text-white text-xs sm:text-sm">{selectedJob.title}</h4>
-                    <p className="text-[10px] text-slate-450 mt-0.5">{selectedJob.workType} • Required Skills: {selectedJob.skills.join(', ')}</p>
+                    <h4 className="font-bold text-sm text-[#172033]">{selectedJob.title}</h4>
+                    <span className="text-[#718096]">{selectedJob.location} • {selectedJob.workType}</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-sm font-black text-emerald-500">{selectedJob.accessibility.readinessScore}%</span>
-                    <span className="text-[8px] text-slate-400 font-bold block uppercase mt-0.5">Readiness</span>
-                  </div>
+                  <StatusBadge tone="success">
+                    Readiness: {selectedJob.accessibility.readinessScore}%
+                  </StatusBadge>
                 </div>
+                <p className="text-[#4B5870] leading-relaxed line-clamp-2">{selectedJob.description}</p>
               </div>
             )}
-          </div>
+          </SurfaceCard>
 
-          {/* Candidate Matches */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-855 pb-3 text-slate-850 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-              <Users className="w-4.5 h-4.5 text-emerald-500" /> Compatible Talent Matches
+          {/* Ranked Candidates Card */}
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#2F6FED]" /> Pre-Screened Ability Matches for this Role
             </h3>
 
-            {/* Privacy guidelines alert banner */}
-            <div className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-150 dark:border-slate-850 text-[10px] text-slate-450 flex items-start gap-2">
-              <ShieldCheck className="w-4.5 h-4.5 text-emerald-500 shrink-0 mt-0.5" />
-              <span>
-                <strong>Privacy Protected</strong>: Candidate identities and diagnostic accessibility accommodations are anonymized. Employers evaluate compatible ratings based on skills and work preference requirements.
-              </span>
-            </div>
-
-            <div className="space-y-3 pt-1">
-              {matches.map((c, idx) => (
-                <div key={idx} className="p-4 border border-slate-150 dark:border-slate-850 rounded-xl flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-slate-800 dark:text-white text-xs sm:text-sm">{c.name}</h4>
-                    <p className="text-[10px] text-slate-450">{c.experienceYears} Years Exp • Core: {c.skills.slice(0, 3).join(', ')}</p>
+            <div className="space-y-3">
+              {mockCandidates.map((cand, idx) => (
+                <div key={idx} className="p-4 rounded-xl border border-[#DCE5F0] bg-white hover:border-[#2F6FED]/40 transition space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-[#172033]">{cand.name}</h4>
+                      <p className="text-xs text-[#718096]">{cand.role}</p>
+                    </div>
+                    <div className="bg-[#EAF2FF] text-[#2F6FED] border border-[#C8D5E5] px-3 py-1 rounded-xl text-center">
+                      <span className="text-sm font-black block leading-none">{cand.score}%</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wider">Match</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-sm font-black text-emerald-500">{c.score}%</span>
-                    <span className="text-[8px] text-slate-400 font-bold block uppercase mt-0.5">Match</span>
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {cand.skills.map((s, i) => (
+                      <span key={i} className="text-[10px] font-semibold bg-[#F7F9FC] border border-[#DCE5F0] px-2 py-0.5 rounded-md text-[#4B5870]">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="text-[11px] text-[#16A36A] font-semibold flex items-center gap-1.5 pt-1 border-t border-[#EAF0F6]">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Requested: {cand.accommodations.join(', ')}</span>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Inclusion Insights */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-855 pb-3 text-slate-850 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-              <TrendingUp className="w-4.5 h-4.5 text-emerald-500" /> Workplace Inclusion Insights
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-150 dark:border-slate-850 space-y-1">
-                <span className="text-[9px] text-emerald-500 font-bold block uppercase tracking-widest">Async Text Boost</span>
-                <span className="text-xs font-bold text-slate-850 dark:text-white block mt-1">30% wider talent coverage</span>
-                <p className="text-[10px] text-slate-450 leading-relaxed mt-0.5">
-                  Supporting asynchronous text chats unlocks applications from speech and hearing impaired candidates.
-                </p>
-              </div>
-
-              <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-150 dark:border-slate-850 space-y-1">
-                <span className="text-[9px] text-emerald-500 font-bold block uppercase tracking-widest">Accessibility Rating</span>
-                <span className="text-xs font-bold text-slate-850 dark:text-white block mt-1">2.4x higher retention rates</span>
-                <p className="text-[10px] text-slate-450 leading-relaxed mt-0.5">
-                  Remote and flexible scheduler parameters decrease workplace burnout quotients by more than 50%.
-                </p>
-              </div>
-            </div>
-          </div>
+          </SurfaceCard>
 
         </div>
 
-        {/* Right Column: Job Creation Form (5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Right Column: Create Accessible Role Requisition (5 Cols) */}
+        <div className="lg:col-span-5 space-y-5">
           
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-850 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-              <Plus className="w-4.5 h-4.5 text-emerald-500" /> Post New Inclusive position
-            </h3>
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            <div className="flex items-center justify-between border-b border-[#DCE5F0] pb-2">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] flex items-center gap-2">
+                <PlusCircle className="w-4 h-4 text-[#2F6FED]" /> Post Inclusive Requisition
+              </h3>
+              <span className="text-[11px] font-bold text-[#2F6FED] bg-[#EAF2FF] px-2.5 py-0.5 rounded-full border border-[#DCE5F0]">
+                Readiness: {currentReadinessScore}%
+              </span>
+            </div>
 
-            <form onSubmit={handleCreateJob} className="space-y-4">
-              {/* Job Title */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Job Title</label>
+            <form onSubmit={handleCreateJob} className="space-y-3.5 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-[#172033]">Job Title</label>
                 <input
                   type="text"
-                  placeholder="e.g. AI Engineer"
+                  required
+                  placeholder="e.g. Accessibility Test Engineer"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
-                  required
+                  className="input-pearl"
                 />
               </div>
 
-              {/* Description */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Description</label>
-                <textarea
-                  placeholder="Summarize the core technical role..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl p-3 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
-                  required
-                />
-              </div>
-
-              {/* Required Skills */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Required Skills (Comma separated)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. React, TypeScript, Python"
-                  value={skillsRequired}
-                  onChange={(e) => setSkillsRequired(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white"
-                />
-              </div>
-
-              {/* Work Setting & Toggles */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Work Mode</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-[#172033]">Work Mode</label>
                   <select
                     value={workType}
                     onChange={(e) => setWorkType(e.target.value as any)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white text-slate-705"
+                    className="input-pearl"
                   >
                     <option value="REMOTE">Fully Remote</option>
-                    <option value="HYBRID">Hybrid Model</option>
-                    <option value="OFFICE">Office Only</option>
+                    <option value="HYBRID">Hybrid</option>
+                    <option value="OFFICE">Onsite</option>
                   </select>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Experience (Years)</label>
+                <div className="space-y-1">
+                  <label className="font-bold text-[#172033]">Experience (Years)</label>
                   <input
                     type="number"
                     min="0"
                     value={experienceRequired}
-                    onChange={(e) => setExperienceRequired(Number(e.target.value))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl px-3 py-2 text-xs focus:outline-none dark:text-white"
+                    onChange={(e) => setExperienceRequired(parseInt(e.target.value) || 0)}
+                    className="input-pearl"
                   />
                 </div>
               </div>
 
-              {/* Accessibility Readiness checklist */}
-              <div className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-850">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block pb-1">Workplace Support Options</span>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
+              <div className="space-y-1">
+                <label className="font-bold text-[#172033]">Required Skills (comma separated)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. React, TypeScript, WCAG, JAWS"
+                  value={skillsRequired}
+                  onChange={(e) => setSkillsRequired(e.target.value)}
+                  className="input-pearl"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-[#172033]">Job Description</label>
+                <textarea
+                  required
+                  placeholder="Describe core mission, deliverables, and team dynamics..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="input-pearl !h-auto"
+                />
+              </div>
+
+              {/* Inclusion Toggles */}
+              <div className="space-y-2 pt-2 border-t border-[#DCE5F0]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#718096] block">
+                  Employer Verified Accommodations
+                </span>
+                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                   {[
-                    { label: 'Remote Available', val: remoteAvailable, set: setRemoteAvailable },
-                    { label: 'Flexible Schedules', val: flexibleHours, set: setFlexibleHours },
-                    { label: 'Screen Reader Support', val: screenReaderCompatible, set: setScreenReaderCompatible },
-                    { label: 'Audio Caption Support', val: captionSupport, set: setCaptionSupport },
-                    { label: 'Text-Only Message Channels', val: textCommunication, set: setTextCommunication },
-                    { label: 'Accessible Interview Channels', val: accessibleInterview, set: setAccessibleInterview },
-                    { label: 'Wheelchair Facilities', val: physicalAccessibility, set: setPhysicalAccessibility },
-                    { label: 'Assistive Tech Setup', val: assistiveTechnologySupport, set: setAssistiveTechnologySupport }
-                  ].map((chk, idx) => (
-                    <label key={idx} className="flex items-center gap-2 cursor-pointer select-none text-slate-600 dark:text-slate-350">
+                    { state: remoteAvailable, set: setRemoteAvailable, label: 'Remote work available' },
+                    { state: flexibleHours, set: setFlexibleHours, label: 'Flexible working hours' },
+                    { state: screenReaderCompatible, set: setScreenReaderCompatible, label: 'Screen reader software compatible' },
+                    { state: captionSupport, set: setCaptionSupport, label: 'Live video captions supported' },
+                    { state: textCommunication, set: setTextCommunication, label: 'Text-only asynchronous options' },
+                    { state: accessibleInterview, set: setAccessibleInterview, label: 'Accessible mock/real interview' },
+                    { state: physicalAccessibility, set: setPhysicalAccessibility, label: 'Wheelchair physical building access' },
+                    { state: assistiveTechnologySupport, set: setAssistiveTechnologySupport, label: 'Assistive hardware provided' },
+                  ].map((t, idx) => (
+                    <label key={idx} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#F7F9FC] cursor-pointer text-xs font-semibold text-[#4B5870]">
                       <input
                         type="checkbox"
-                        checked={chk.val}
-                        onChange={(e) => chk.set(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-slate-300 text-emerald-650 focus:ring-emerald-450 focus:outline-none shrink-0"
+                        checked={t.state}
+                        onChange={(e) => t.set(e.target.checked)}
+                        className="h-4 w-4 rounded-md border-[#DCE5F0] text-[#2F6FED] focus:ring-[#2F6FED]"
                       />
-                      <span>{chk.label}</span>
+                      <span>{t.label}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Dynamic Readiness Score preview */}
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-white flex items-center justify-between text-xs font-bold">
-                <span className="text-slate-400">Accessibility Readiness Score:</span>
-                <span className="text-emerald-400">{currentReadinessScore}%</span>
-              </div>
-
               <button
                 type="submit"
-                className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition focus:outline-none shadow-md shadow-emerald-500/10"
+                className="button-primary w-full !py-3 text-xs mt-2"
               >
-                Create Job Opening
+                <span>Publish Inclusive Requisition</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </form>
-          </div>
+          </SurfaceCard>
 
         </div>
 

@@ -9,7 +9,7 @@ export interface ValidationResult {
 
 export class IntentValidator {
   /**
-   * Validate Gemini Live Tool Call against authoritative OpenAbility state machine guard
+   * Validate Gemini Live Tool Call against authoritative InnoSkill AI state machine guard
    */
   public validateToolCall(
     functionName: string,

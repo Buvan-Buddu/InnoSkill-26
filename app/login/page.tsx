@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useVoiceAgent } from '@/context/VoiceAgentContext';
-import { HeartHandshake, Lock, Mail, ArrowRight, Volume2 } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import InnoSkillLogo from '@/components/brand/InnoSkillLogo';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -44,8 +45,8 @@ export default function LoginPage() {
     window.addEventListener('voice-submit-login-form', handleVoiceSubmitForm);
 
     const greeting = activeLanguage === 'hi-IN'
-      ? "नमस्कार, ओपनएबिलिटी में आपका पुनः स्वागत है। लॉग इन करने के लिए अपना पंजीकृत ईमेल और पासवर्ड दर्ज करें।"
-      : "Hello, welcome back to OpenAbility. Please enter your registered email and password to log in.";
+      ? "नमस्कार, इननोस्किल एआई में आपका पुनः स्वागत है। लॉग इन करने के लिए अपना पंजीकृत ईमेल और पासवर्ड दर्ज करें।"
+      : "Hello, welcome back to InnoSkill AI. Please enter your registered email and password to log in.";
     const timer = setTimeout(() => {
       speakFeedback(greeting);
     }, 600);
@@ -77,39 +78,70 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between p-6 sm:p-12 relative overflow-hidden select-none">
+    <div className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#F7F9FC] text-[#172033] select-none bg-pearl-grid">
       
-      {/* Spotlight Ambient Lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none" />
+      {/* Ambient Pearl Glow */}
+      <div className="pointer-events-none absolute -right-20 top-20 h-[32rem] w-[32rem] rounded-full pearl-glow" />
 
       {/* Header */}
-      <header className="max-w-md mx-auto w-full flex items-center justify-between z-10">
-        <Link href="/" className="flex items-center gap-3 group" aria-label="Go to Home">
-          <img src="/logo/logo.jpeg" alt="OpenAbility AI Logo" className="w-9 h-9 rounded-xl object-cover border border-emerald-500/30 group-hover:border-emerald-400 transition" />
-          <div>
-            <h1 className="font-extrabold text-base tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">
-              OpenAbility AI
-            </h1>
-            <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">Your ability. Your career. Your way.</p>
-          </div>
+      <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6 sm:px-10">
+        <Link href="/" className="flex items-center group hover:opacity-95 transition" aria-label="Go to Home">
+          <InnoSkillLogo variant="header" size="md" />
+        </Link>
+        <Link href="/signup" className="button-secondary text-xs !py-2 !min-h-9">
+          Create Account
         </Link>
       </header>
 
-      {/* Login Card */}
-      <main className="max-w-md mx-auto w-full space-y-6 my-auto z-10 py-8">
+      {/* Login Main Area */}
+      <main className="relative z-10 mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-6 py-8 sm:px-10 lg:grid-cols-[1.1fr_440px]">
         
-        <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl space-y-6 shadow-2xl backdrop-blur-md">
-          <div className="space-y-2 text-center">
-            <span className="text-[11px] text-emerald-400 font-black uppercase tracking-widest bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/30">
+        {/* Left Side: Brand Value Proposition */}
+        <div className="hidden max-w-lg lg:block space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF2FF] border border-[#C8D5E5] text-xs font-bold text-[#2F6FED]">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Inclusive Career Ecosystem</span>
+          </div>
+
+          <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-[#172033] xl:text-5xl">
+            A clearer path to your next opportunity.
+          </h1>
+          
+          <p className="text-base leading-7 text-[#4B5870]">
+            Bring your resume, skills, workplace preferences, and career goals into one calm, intelligent workspace built to help you move forward.
+          </p>
+          
+          <div className="grid grid-cols-3 gap-3 pt-2">
+            {[
+              { title: 'AI Plans', desc: 'Guided paths' },
+              { title: 'Accessible', desc: 'WCAG 2.1 AA' },
+              { title: 'Enterprise', desc: 'SAP connected' }
+            ].map((feature, i) => (
+              <div key={i} className="surface-card p-3.5 text-center">
+                <span className="text-xs font-bold text-[#172033] block">{feature.title}</span>
+                <span className="text-[11px] text-[#718096]">{feature.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Side: Login Card */}
+        <div className="surface-card p-8 sm:p-9 shadow-[0_10px_35px_rgba(22,59,115,0.08)] space-y-6 border border-[#DCE5F0] bg-white">
+          <div className="space-y-1.5 text-center">
+            <span className="text-[11px] text-[#2F6FED] font-bold uppercase tracking-wider bg-[#EAF2FF] px-3.5 py-1 rounded-full border border-[#DCE5F0]">
               Welcome Back
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white pt-1">Log in to OpenAbility</h2>
-            <p className="text-xs text-slate-300 font-medium">Access your saved career profile, resume, and interview history.</p>
+            <h2 className="pt-2 text-2xl font-bold tracking-tight text-[#172033]">
+              Log in to InnoSkill
+            </h2>
+            <p className="text-xs font-medium text-[#718096]">
+              Access your career profile, resume scans, and interviews.
+            </p>
           </div>
 
           {error && (
-            <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs font-bold text-center animate-in fade-in duration-200">
-              ⚠️ {error}
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3.5 text-center text-xs font-bold text-[#D64545]">
+              {error}
             </div>
           )}
 
@@ -117,19 +149,19 @@ export default function LoginPage() {
             
             {/* Email Address */}
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-xs font-extrabold text-slate-200 uppercase tracking-wider block">
-                Email Address <span className="text-emerald-400">*</span>
+              <label htmlFor="email" className="block text-xs font-bold text-[#172033]">
+                Email address <span className="text-[#2F6FED]">*</span>
               </label>
               <div className="relative">
-                <Mail className="w-4.5 h-4.5 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#718096]" />
                 <input
                   id="email"
                   type="email"
                   required
-                  placeholder="rahul@example.com"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none text-white font-semibold placeholder-slate-500"
+                  className="input-pearl !pl-10"
                 />
               </div>
             </div>
@@ -137,15 +169,15 @@ export default function LoginPage() {
             {/* Password */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label htmlFor="password" className="text-xs font-extrabold text-slate-200 uppercase tracking-wider block">
-                  Password <span className="text-emerald-400">*</span>
+                <label htmlFor="password" className="block text-xs font-bold text-[#172033]">
+                  Password <span className="text-[#2F6FED]">*</span>
                 </label>
-                <Link href="/forgot-password" className="text-xs text-emerald-400 font-extrabold hover:underline">
-                  Forgot Password?
+                <Link href="/forgot-password" className="text-xs font-semibold text-[#2F6FED] hover:underline">
+                  Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="w-4.5 h-4.5 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#718096]" />
                 <input
                   id="password"
                   type="password"
@@ -153,7 +185,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none text-white font-semibold placeholder-slate-500"
+                  className="input-pearl !pl-10"
                 />
               </div>
             </div>
@@ -161,25 +193,26 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="button-primary w-full mt-2 cursor-pointer"
             >
-              {submitting ? 'Authenticating...' : 'Log In'}
+              <span>{submitting ? 'Authenticating...' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="text-center pt-3 border-t border-slate-800 text-xs text-slate-300 font-medium">
+          <div className="border-t border-[#DCE5F0] pt-4 text-center text-xs text-[#718096]">
             Don't have an account?{' '}
-            <Link href="/signup" className="text-emerald-400 font-black hover:underline">
-              Create Account
+            <Link href="/signup" className="font-bold text-[#2F6FED] hover:underline">
+              Create Candidate Account
             </Link>
           </div>
         </div>
 
       </main>
 
-      <footer className="max-w-md mx-auto w-full text-center text-[11px] text-slate-400 font-semibold z-10">
-        HttpOnly Session Security · Server Derived Authentication
+      {/* Footer */}
+      <footer className="relative z-10 mx-auto w-full max-w-6xl px-6 py-5 text-center text-xs font-medium text-[#718096] sm:px-10 border-t border-[#DCE5F0]">
+        InnoSkill AI • Secure End-to-End Authentication • Enterprise Inclusion Companion
       </footer>
     </div>
   );

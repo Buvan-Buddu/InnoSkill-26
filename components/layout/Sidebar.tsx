@@ -11,8 +11,14 @@ import {
   Briefcase, 
   Mic, 
   X,
-  ChevronRight
+  Bot,
+  Volume2,
+  Hand,
+  Building2,
+  Plug,
+  Building,
 } from 'lucide-react';
+import InnoSkillLogo from '@/components/brand/InnoSkillLogo';
 
 interface SidebarItem {
   name: string;
@@ -21,13 +27,25 @@ interface SidebarItem {
   description: string;
 }
 
-const navItems: SidebarItem[] = [
-  { name: 'Overview', href: '/dashboard', icon: LayoutDashboard, description: 'Career Hub' },
-  { name: 'My Profile', href: '/dashboard/profile', icon: User, description: 'Accommodations' },
+const mainItems: SidebarItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, description: 'Career Hub' },
+  { name: 'Profile', href: '/dashboard/profile', icon: User, description: 'Accommodations' },
   { name: 'Resume', href: '/dashboard/resume', icon: FileText, description: 'Builder & Scanner' },
-  { name: 'Jobs Board', href: '/dashboard/jobs', icon: Briefcase, description: 'Ability Matching' },
-  { name: 'Career & Skills', href: '/dashboard/skills', icon: Award, description: 'Roadmaps' },
-  { name: 'Mock Interview', href: '/dashboard/interview', icon: Mic, description: 'Voice Practice' },
+  { name: 'Jobs', href: '/dashboard/jobs', icon: Briefcase, description: 'Ability Matching' },
+  { name: 'Skills', href: '/dashboard/skills', icon: Award, description: 'Roadmaps' },
+  { name: 'Interview', href: '/dashboard/interview', icon: Mic, description: 'Voice Practice' },
+];
+
+const toolItems: SidebarItem[] = [
+  { name: 'AI Assistant', href: '/dashboard/assistant', icon: Bot, description: 'Guidance' },
+  { name: 'Voice Assistant', href: '/dashboard/voice', icon: Volume2, description: 'Voice control' },
+  { name: 'Sign Language', href: '/dashboard/sign-language', icon: Hand, description: 'Vision workspace' },
+];
+
+const workspaceItems: SidebarItem[] = [
+  { name: 'Workplace', href: '/dashboard/workplace', icon: Building2, description: 'Support' },
+  { name: 'Integrations', href: '/dashboard/integrations/sap', icon: Plug, description: 'Connected tools' },
+  { name: 'Employer Portal', href: '/employer', icon: Building, description: 'Enterprise hiring' },
 ];
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
@@ -36,7 +54,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('openability_candidate');
+      const stored = localStorage.getItem('innoskill_candidate') || localStorage.getItem('openability_candidate');
       if (stored) {
         try {
           const data = JSON.parse(stored);
@@ -56,81 +74,88 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
     .filter(Boolean)
     .join('')
     .slice(0, 2)
-    .toUpperCase() || 'OA';
+    .toUpperCase() || 'IS';
 
   return (
-    <aside className="w-64 bg-slate-900 text-white flex flex-col h-full select-none border-r border-slate-800/80 shadow-lg" aria-label="Dashboard navigation">
+    <aside className="flex h-full w-[268px] select-none flex-col border-r border-[#DCE5F0] bg-white text-[#172033]" aria-label="Dashboard navigation">
       
       {/* Brand Logo Header */}
-      <div className="px-6 py-5 border-b border-slate-800/80 flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-3 group hover:opacity-95 transition cursor-pointer" aria-label="Go to Home page">
-          <img 
-            src="/logo/logo.jpeg" 
-            alt="OpenAbility AI Logo" 
-            className="w-8.5 h-8.5 rounded-xl object-cover border border-teal-500/30" 
-          />
-          <div>
-            <h1 className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
-              OpenAbility <span className="text-teal-400 text-xs font-semibold px-1.5 py-0.5 rounded bg-teal-500/10 border border-teal-500/20">AI</span>
-            </h1>
-            <p className="text-[10px] text-slate-400 font-medium tracking-wide">Inclusive Career Companion</p>
-          </div>
+      <div className="flex items-center justify-between gap-3 border-b border-[#DCE5F0] bg-white px-5 py-5">
+        <Link href="/" className="group flex items-center" aria-label="Go to Home page">
+          <InnoSkillLogo variant="header" size="sm" showSubtitle={false} />
         </Link>
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="rounded-lg p-2 text-[#718096] hover:bg-[#F1F5FA] hover:text-[#172033]"
             aria-label="Close navigation menu"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </button>
         )}
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-        <div className="px-3 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          Main Navigation
-        </div>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3.5 py-5 scrollbar-none">
+        <NavGroup label="Career Workspace" items={mainItems} pathname={pathname} onClose={onClose} />
+        <NavGroup label="AI Capabilities" items={toolItems} pathname={pathname} onClose={onClose} />
+        <NavGroup label="Enterprise & Tools" items={workspaceItems} pathname={pathname} onClose={onClose} />
+      </nav>
+
+      {/* User Profile Footer */}
+      <div className="border-t border-[#DCE5F0] bg-[#F7F9FC] p-4">
+        <Link 
+          href="/dashboard/profile" 
+          className="group flex items-center gap-3 rounded-xl p-2 transition hover:bg-white border border-transparent hover:border-[#DCE5F0] hover:shadow-sm" 
+          onClick={onClose}
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#EAF2FF] text-xs font-bold uppercase text-[#2F6FED] border border-[#C8D5E5]">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold text-[#172033] group-hover:text-[#2F6FED] transition-colors">{candidateName}</p>
+            <p className="truncate text-[10px] font-medium text-[#718096]">Candidate account</p>
+          </div>
+        </Link>
+      </div>
+    </aside>
+  );
+}
+
+function NavGroup({ label, items, pathname, onClose }: { label: string; items: SidebarItem[]; pathname: string; onClose?: () => void }) {
+  return (
+    <div>
+      <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#718096]">{label}</p>
+      <div className="space-y-1">
+        {items.map((item) => {
+          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           const Icon = item.icon;
 
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all duration-150 group focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+              onClick={onClose}
+              className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-150 ${
                 isActive
-                  ? 'bg-slate-800 text-white font-bold border-l-4 border-teal-400 shadow-sm'
-                  : 'text-slate-300 hover:bg-slate-850 hover:text-white border-l-4 border-transparent font-medium'
+                  ? 'bg-[#EAF2FF] font-bold text-[#2F6FED] shadow-xs'
+                  : 'font-medium text-[#4B5870] hover:bg-[#F1F5FA] hover:text-[#172033]'
               }`}
               aria-current={isActive ? 'page' : undefined}
             >
-              <div className="flex items-center gap-3">
-                <Icon className={`w-4.5 h-4.5 transition-colors ${
-                  isActive ? 'text-teal-400' : 'text-slate-400 group-hover:text-slate-200'
-                }`} />
-                <span className="text-xs sm:text-sm">{item.name}</span>
-              </div>
-              {isActive && <ChevronRight className="w-3.5 h-3.5 text-teal-400" />}
+              {isActive && (
+                <span className="absolute inset-y-2 left-0 w-1 rounded-r-full bg-[#2F6FED]" aria-hidden="true" />
+              )}
+              <Icon 
+                className={`h-4.5 w-4.5 transition-colors ${
+                  isActive ? 'text-[#2F6FED]' : 'text-[#718096] group-hover:text-[#2F6FED]'
+                }`} 
+              />
+              <span className="truncate">{item.name}</span>
             </Link>
           );
         })}
-      </nav>
-
-      {/* User Profile Footer */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-950/60">
-        <Link href="/dashboard/profile" className="flex items-center gap-3 group hover:opacity-90 transition">
-          <div className="w-9 h-9 rounded-full bg-teal-600 border border-teal-400/40 flex items-center justify-center font-bold text-white uppercase text-xs shadow-sm">
-            {initials}
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <p className="font-bold text-xs text-slate-100 truncate group-hover:text-teal-300 transition-colors">{candidateName}</p>
-            <p className="text-[10px] text-slate-400 truncate">Candidate Account</p>
-          </div>
-        </Link>
       </div>
-    </aside>
+    </div>
   );
 }

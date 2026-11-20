@@ -13,8 +13,40 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenAbility AI — Inclusive Career Intelligence & Accessible Hiring",
-  description: "An AI-powered career companion that adapts the hiring experience to the way you communicate, work, and grow. Discovery matches tailored to your strengths.",
+  metadataBase: new URL('https://innoskill.ai'),
+  title: "InnoSkill AI — Inclusive Career Companion",
+  description: "InnoSkill AI is an inclusive AI-powered career companion for accessible job discovery, resume intelligence, career development, and interview preparation.",
+  icons: {
+    icon: [
+      { url: "/branding/innoskill-ai-favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/branding/innoskill-ai-icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico" }
+    ],
+    shortcut: "/branding/innoskill-ai-favicon.png",
+    apple: "/branding/innoskill-ai-icon.png",
+  },
+  openGraph: {
+    title: "InnoSkill AI — Inclusive Career Companion",
+    description: "InnoSkill AI is an inclusive AI-powered career companion for accessible job discovery, resume intelligence, career development, and interview preparation.",
+    url: "https://innoskill.ai",
+    siteName: "InnoSkill AI",
+    images: [
+      {
+        url: "/branding/innoskill-ai-logo.png",
+        width: 1024,
+        height: 440,
+        alt: "InnoSkill AI — Inclusive Career Companion",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "InnoSkill AI — Inclusive Career Companion",
+    description: "InnoSkill AI is an inclusive AI-powered career companion for accessible job discovery, resume intelligence, career development, and interview preparation.",
+    images: ["/branding/innoskill-ai-logo.png"],
+  },
 };
 
 import { AuthProvider } from '@/context/AuthContext';
@@ -26,8 +58,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <AuthProvider>
           <VoiceAgentProvider>
             {children}

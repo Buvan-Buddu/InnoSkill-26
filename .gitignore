@@ -22,7 +22,12 @@
 
 # misc
 .DS_Store
+__MACOSX/
 *.pem
+
+# local worktrees and source archives
+/.kilo/
+*.zip
 
 # debug
 npm-debug.log*

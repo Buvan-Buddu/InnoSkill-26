@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ShieldCheck, ChevronRight, CheckCircle2, AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 export interface SapStatusData {
   isConfigured: boolean;
@@ -56,98 +57,96 @@ export function SapStatusCard() {
   const getStatusBadge = () => {
     if (loading) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-extrabold border border-slate-700">
-          <RefreshCw className="w-3 h-3 animate-spin text-slate-400" />
-          <span>Verifying Connection...</span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1F5FA] text-[#4B5870] text-xs font-bold border border-[#DCE5F0]">
+          <RefreshCw className="w-3 h-3 animate-spin text-[#2F6FED]" />
+          <span>Verifying Sync...</span>
         </span>
       );
     }
 
     if (status.isConnected) {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-extrabold border border-emerald-500/30">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true" />
-          <span>● Connected</span>
-        </span>
-      );
+      return <StatusBadge tone="success">Connected & Active</StatusBadge>;
     }
 
     if (!status.isConfigured) {
-      return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-extrabold border border-amber-500/30">
-          <span className="w-2 h-2 rounded-full bg-amber-400" aria-hidden="true" />
-          <span>● Not Configured</span>
-        </span>
-      );
+      return <StatusBadge tone="warning">Configuration Pending</StatusBadge>;
     }
 
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-extrabold border border-red-500/30">
-        <span className="w-2 h-2 rounded-full bg-red-400" aria-hidden="true" />
-        <span>● Temporarily Unavailable</span>
-      </span>
-    );
+    return <StatusBadge tone="danger">Temporarily Offline</StatusBadge>;
   };
 
   return (
-    <div className="bg-slate-900 border-2 border-slate-800 hover:border-emerald-500/30 rounded-2xl p-6 space-y-5 shadow-xl transition-all">
+    <div className="surface-card p-6 space-y-5 transition-all hover:border-[#C8D5E5]">
       
       {/* Card Header */}
-      <div className="flex items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-            <ShieldCheck className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DCE5F0] pb-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-[#EAF2FF] border border-[#C8D5E5] flex items-center justify-center text-[#2F6FED]">
+            <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-black text-sm text-white tracking-tight">SAP Enterprise Integration</h3>
-            <p className="text-[11px] text-slate-400 font-medium">Real-Time OData v2 Integration</p>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-base text-[#172033]">SAP SuccessFactors Integration</h3>
+              <span className="hidden sm:inline text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#EAF2FF] text-[#2F6FED] border border-[#DCE5F0]">
+                OData v2
+              </span>
+            </div>
+            <p className="text-xs text-[#718096]">
+              Real-time enterprise job requisitions and candidate accessibility accommodation sync.
+            </p>
           </div>
         </div>
 
-        <div>{getStatusBadge()}</div>
-      </div>
-
-      {/* Product Details & Status */}
-      <div className="space-y-3 text-xs">
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">SAP Product</span>
-          <p className="font-extrabold text-slate-200">{status.provider}</p>
-        </div>
-
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Connection Status</span>
-          <p className="text-slate-300 font-medium leading-relaxed">{status.message}</p>
+        <div className="flex items-center gap-2 shrink-0">
+          {getStatusBadge()}
+          <button
+            onClick={fetchStatus}
+            disabled={loading}
+            className="p-1.5 rounded-xl border border-[#DCE5F0] bg-white hover:bg-[#F4F8FF] text-[#718096] hover:text-[#2F6FED] transition cursor-pointer"
+            title="Refresh status"
+            aria-label="Refresh SAP connection status"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#2F6FED]' : ''}`} />
+          </button>
         </div>
       </div>
 
-      {/* Used by OpenAbility */}
-      <div className="space-y-2 pt-2 border-t border-slate-800">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Used by OpenAbility</span>
-        <div className="grid grid-cols-2 gap-2 text-[11px]">
-          {[
-            'Jobs Board',
-            'Career & Skills',
-            'AI Career Matching',
-            'Profile Sync',
-            'Resume Intelligence',
-            'Voice Assistant'
-          ].map((item) => (
-            <div key={item} className="flex items-center gap-1.5 text-slate-300 font-semibold">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>{item}</span>
-            </div>
-          ))}
+      {/* Info Breakdown Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
+        <div className="bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl p-3.5">
+          <span className="text-[10px] font-bold text-[#718096] uppercase tracking-wider block">Connected Protocol</span>
+          <span className="font-bold text-[#172033] mt-1 block truncate">
+            {status.provider}
+          </span>
+        </div>
+
+        <div className="bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl p-3.5">
+          <span className="text-[10px] font-bold text-[#718096] uppercase tracking-wider block">Synced Job Openings</span>
+          <span className="font-bold text-[#172033] mt-1 block">
+            {status.jobCount} Active Requisitions
+          </span>
+        </div>
+
+        <div className="bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl p-3.5">
+          <span className="text-[10px] font-bold text-[#718096] uppercase tracking-wider block">Security Protocol</span>
+          <span className="font-bold text-[#16A36A] mt-1 block">
+            OAuth 2.0 / SAML Bearer
+          </span>
         </div>
       </div>
 
-      {/* Action link */}
-      <div className="pt-2">
+      {/* Footer Navigation Link */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 text-xs">
+        <p className="text-[#718096] font-medium">
+          {status.message}
+        </p>
+        
         <Link
           href="/dashboard/integrations/sap"
-          className="w-full py-2.5 bg-slate-800 hover:bg-slate-750 text-white font-extrabold rounded-xl text-xs flex items-center justify-center gap-1.5 transition border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          className="inline-flex items-center gap-1.5 font-bold text-[#2F6FED] hover:text-[#245ED0] transition-colors"
         >
-          <span>View Integration Details</span>
-          <ChevronRight className="w-4 h-4 text-emerald-400" />
+          <span>Open Enterprise Integration Diagnostics</span>
+          <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
 

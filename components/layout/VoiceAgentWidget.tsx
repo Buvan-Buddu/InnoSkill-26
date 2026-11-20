@@ -8,13 +8,10 @@ import {
   VolumeX, 
   X, 
   Sparkles, 
-  Play, 
-  HelpCircle,
   FileText,
   Copy,
-  Trash2,
   Check,
-  MessageSquareText
+  RotateCcw
 } from 'lucide-react';
 
 export default function VoiceAgentWidget() {
@@ -28,12 +25,10 @@ export default function VoiceAgentWidget() {
     setTtsEnabled,
     startAgentListening,
     toggleAgentListening,
-    triggerVoiceDemo,
     replayLastSpeech
   } = useVoiceAgent();
 
   const [expanded, setExpanded] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -42,12 +37,17 @@ export default function VoiceAgentWidget() {
   // Auto-trigger live spoken text toast when transcript changes
   useEffect(() => {
     if (transcript && transcript.trim()) {
-      setLastToastText(transcript);
-      setShowToast(true);
       const timer = setTimeout(() => {
+        setLastToastText(transcript);
+        setShowToast(true);
+      }, 0);
+      const hideTimer = setTimeout(() => {
         setShowToast(false);
-      }, 6000);
-      return () => clearTimeout(timer);
+      }, 5000);
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [transcript]);
 
@@ -66,7 +66,6 @@ export default function VoiceAgentWidget() {
     };
   }, [startAgentListening]);
 
-  // Focus and trigger listening when space/enter are typed
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
@@ -86,36 +85,31 @@ export default function VoiceAgentWidget() {
 
   const getStatusText = () => {
     switch (status) {
-      case 'LISTENING': return 'Listening to voice...';
-      case 'PROCESSING': return 'Understanding...';
-      case 'EXECUTING': return 'Executing command...';
-      case 'CONFIRMING': return 'Waiting for confirmation...';
-      case 'ERROR': return 'Connection Error';
-      default: return 'Ask OpenAbility';
+      case 'LISTENING': return 'Listening...';
+      case 'PROCESSING': return 'Processing intent...';
+      case 'EXECUTING': return 'Navigating...';
+      case 'CONFIRMING': return 'Awaiting response...';
+      case 'ERROR': return 'Connection error';
+      default: return 'Voice Control';
     }
   };
 
   return (
     <>
-      {/* 🟢 LIVE SPOKEN TEXT OVERLAY TOAST BANNER (Appears at bottom-center of web page when speaking) */}
+      {/* Spoken Text Overlay Toast Banner */}
       {showToast && lastToastText && (
         <div 
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] max-w-lg w-[90%] bg-slate-900/95 backdrop-blur-md border border-emerald-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] max-w-lg w-[90%] bg-white border border-[#C8D5E5] text-[#172033] px-4 py-3 rounded-2xl shadow-[0_10px_30px_rgba(22,59,115,0.12)] flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-3 duration-200"
           role="status"
           aria-live="polite"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
-              <MessageSquareText className="w-4 h-4 text-emerald-400 animate-pulse" />
-            </div>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+              <Mic className="w-4 h-4 animate-pulse" />
+            </span>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">Live Voice Log</span>
-                <span className="text-[9px] text-slate-400">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-              </div>
-              <p className="text-xs font-semibold text-slate-100 truncate italic">
-                &ldquo;{lastToastText}&rdquo;
-              </p>
+              <span className="text-[10px] font-bold text-[#718096] uppercase tracking-wider block">Live Voice Input</span>
+              <p className="text-xs font-semibold text-[#172033] truncate">{lastToastText}</p>
             </div>
           </div>
 
@@ -126,13 +120,13 @@ export default function VoiceAgentWidget() {
                 setShowLogs(true);
                 setShowToast(false);
               }}
-              className="px-2.5 py-1 text-[10px] font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-lg transition"
+              className="px-2.5 py-1 text-[10px] font-bold bg-[#EAF2FF] hover:bg-[#DCE5F0] text-[#2F6FED] rounded-lg transition"
             >
-              View Log
+              Logs
             </button>
             <button
               onClick={() => setShowToast(false)}
-              className="p-1 text-slate-400 hover:text-white rounded-lg"
+              className="p-1 text-[#718096] hover:text-[#172033] rounded-lg"
               aria-label="Close Toast"
             >
               <X className="w-3.5 h-3.5" />
@@ -141,26 +135,25 @@ export default function VoiceAgentWidget() {
         </div>
       )}
 
-      {/* FLOATING CONTROLLER WIDGET (Bottom Right) */}
-      <div className="fixed bottom-6 right-6 z-[99] font-sans">
+      {/* Floating Controller Widget (Bottom Left to avoid collision with PersistentAssistant on bottom right) */}
+      <div className="fixed bottom-6 left-4 sm:left-6 z-[99] select-none max-w-[calc(100vw-32px)]">
         
-        {/* Collapsed Bubble state */}
+        {/* Collapsed Pill */}
         {!expanded && (
           <button
             onClick={() => setExpanded(true)}
-            className="flex items-center gap-2.5 px-4.5 py-3.5 bg-slate-900 border border-slate-800 text-white rounded-full hover:bg-slate-850 shadow-xl transition focus:outline-none focus:ring-2 focus:ring-emerald-400 select-none animate-bounce"
+            className="flex items-center gap-2.5 px-4 py-3 bg-white border border-[#DCE5F0] text-[#172033] rounded-2xl hover:border-[#2F6FED] hover:bg-[#F4F8FF] shadow-[0_4px_14px_rgba(22,59,115,0.08)] transition-all cursor-pointer focus:ring-2 focus:ring-[#2F6FED]"
             aria-label="Open Voice Agent Console"
-            aria-live="polite"
           >
             <div className="relative">
-              <Mic className="w-4 h-4 text-emerald-400" />
+              <Mic className={`w-4 h-4 ${status === 'LISTENING' ? 'text-red-500 animate-pulse' : 'text-[#2F6FED]'}`} />
               {status === 'LISTENING' && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-ping" />
               )}
             </div>
-            <span className="text-[11px] font-bold tracking-wider uppercase">Ask OpenAbility</span>
+            <span className="text-xs font-bold tracking-tight text-[#172033]">Voice Engine</span>
             {voiceLogs.length > 0 && (
-              <span className="px-1.5 py-0.5 text-[9px] font-black bg-emerald-500 text-slate-950 rounded-full">
+              <span className="px-1.5 py-0.2 text-[10px] font-bold bg-[#EAF2FF] text-[#2F6FED] rounded-md border border-[#C8D5E5]">
                 {voiceLogs.length}
               </span>
             )}
@@ -170,32 +163,34 @@ export default function VoiceAgentWidget() {
         {/* Expanded Voice Agent Drawer */}
         {expanded && (
           <div 
-            className="w-84 bg-slate-900 border border-slate-800 text-white rounded-3xl p-5 shadow-2xl space-y-4 animate-in slide-in-from-bottom-4 duration-250"
+            className="w-[calc(100vw-32px)] sm:w-84 max-w-sm bg-white border border-[#DCE5F0] text-[#172033] rounded-[20px] p-4 sm:p-5 shadow-[0_12px_40px_rgba(22,59,115,0.14)] space-y-4 animate-in slide-in-from-bottom-4 duration-200"
             role="dialog"
             aria-label="Voice Agent Interface"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <div className="flex items-center justify-between border-b border-[#DCE5F0] pb-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4.5 h-4.5 text-emerald-400" />
-                <h3 className="font-extrabold text-xs tracking-wider uppercase">Voice Agent Console</h3>
+                <span className="p-1.5 rounded-lg bg-[#EAF2FF] text-[#2F6FED]">
+                  <Sparkles className="w-4 h-4" />
+                </span>
+                <h3 className="font-bold text-xs tracking-tight text-[#172033]">Voice Navigation Engine</h3>
               </div>
               
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setShowLogs(!showLogs)}
                   className={`p-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
-                    showLogs ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    showLogs ? 'bg-[#EAF2FF] text-[#2F6FED]' : 'text-[#718096] hover:bg-[#F1F5FA]'
                   }`}
-                  title="Toggle Spoken Text Logs"
+                  title="Toggle Voice Logs"
                 >
                   <FileText className="w-3.5 h-3.5" />
-                  <span className="text-[10px]">Logs ({voiceLogs.length})</span>
+                  <span className="text-[10px]">{voiceLogs.length}</span>
                 </button>
 
                 <button
                   onClick={() => setExpanded(false)}
-                  className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition focus:outline-none"
+                  className="p-1.5 hover:bg-[#F1F5FA] rounded-lg text-[#718096] hover:text-[#172033] transition"
                   aria-label="Collapse Voice Agent Console"
                 >
                   <X className="w-4 h-4" />
@@ -203,186 +198,98 @@ export default function VoiceAgentWidget() {
               </div>
             </div>
 
-            {/* TAB 1: Voice Control & Microphone */}
+            {/* View 1: Voice Control & Microphone */}
             {!showLogs && (
               <>
-                {/* Listening State Display */}
-                <div className="p-4 bg-slate-950 rounded-2xl border border-slate-850 flex flex-col items-center justify-center text-center space-y-3.5 relative overflow-hidden">
+                <div className="p-5 bg-[#F7F9FC] rounded-2xl border border-[#EAF0F6] flex flex-col items-center justify-center text-center space-y-3">
                   <button
                     onClick={toggleAgentListening}
                     onKeyDown={handleKeyDown}
                     tabIndex={0}
-                    className={`w-14 h-14 rounded-full flex items-center justify-center transition border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+                    className={`w-14 h-14 rounded-2xl flex items-center justify-center transition border shadow-xs cursor-pointer focus:ring-2 focus:ring-[#2F6FED] ${
                       status === 'LISTENING'
-                        ? 'bg-red-500/10 border-red-500 text-red-400 animate-pulse'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                        ? 'bg-red-50 border-red-300 text-red-600 animate-pulse'
+                        : 'bg-[#2F6FED] border-[#2F6FED] text-white hover:bg-[#245ED0]'
                     }`}
                     aria-label={status === 'LISTENING' ? "Mute Microphone" : "Activate Microphone"}
-                    aria-live="assertive"
                   >
                     <Mic className="w-6 h-6" />
                   </button>
 
-                  <div className="space-y-0.5">
-                    <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                      status === 'LISTENING' ? 'text-red-400' : 'text-emerald-400'
-                    }`}>
-                      {getStatusText()}
-                    </span>
-                    <p className="text-[10px] text-slate-450 leading-relaxed max-w-xs mt-1">
-                      {feedback}
-                    </p>
+                  <div>
+                    <span className="text-xs font-bold text-[#172033]">{getStatusText()}</span>
+                    <p className="text-[10px] text-[#718096] mt-0.5">Press spacebar or click to speak</p>
                   </div>
-
-                  {/* Glowing sound wave bars during active listening */}
-                  {status === 'LISTENING' && (
-                    <div className="flex justify-center gap-0.5 pt-1.5 h-4">
-                      <span className="w-0.5 bg-red-400 rounded-full animate-pulse h-2" style={{ animationDelay: '0ms' }} />
-                      <span className="w-0.5 bg-red-400 rounded-full animate-pulse h-4" style={{ animationDelay: '150ms' }} />
-                      <span className="w-0.5 bg-red-400 rounded-full animate-pulse h-3" style={{ animationDelay: '300ms' }} />
-                      <span className="w-0.5 bg-red-400 rounded-full animate-pulse h-1.5" style={{ animationDelay: '450ms' }} />
-                    </div>
-                  )}
                 </div>
 
-                {/* Latest Spoken Text Log Box */}
-                {transcript && (
-                  <div className="p-3 bg-slate-950/80 rounded-xl border border-emerald-500/30 text-[11px] space-y-1 leading-normal text-slate-200">
-                    <div className="flex items-center justify-between text-emerald-400 font-extrabold text-[10px]">
-                      <span>🗣️ SPOKEN TEXT HEARD:</span>
-                      <span>JUST NOW</span>
-                    </div>
-                    <p className="italic font-medium text-white">&ldquo;{transcript}&rdquo;</p>
+                {feedback && (
+                  <div className="bg-[#EAF2FF] border border-[#C8D5E5] p-3 rounded-xl text-xs font-medium text-[#163B73] leading-relaxed">
+                    {feedback}
                   </div>
                 )}
 
-                {/* Controller buttons */}
-                <div className="flex gap-2 justify-between">
+                <div className="flex items-center justify-between text-xs pt-1 border-t border-[#DCE5F0]">
                   <button
                     onClick={() => setTtsEnabled(!ttsEnabled)}
-                    className={`flex-1 py-2 px-3 border rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1.5 focus:outline-none ${
-                      ttsEnabled
-                        ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400'
-                        : 'border-slate-800 text-slate-400 hover:bg-slate-800'
-                    }`}
+                    className="flex items-center gap-1.5 text-[#718096] hover:text-[#2F6FED] transition font-medium"
                   >
-                    {ttsEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-                    <span>{ttsEnabled ? 'Voice: On' : 'Voice: Off'}</span>
+                    {ttsEnabled ? <Volume2 className="w-4 h-4 text-[#2F6FED]" /> : <VolumeX className="w-4 h-4" />}
+                    <span>{ttsEnabled ? 'Audio Output On' : 'Audio Output Off'}</span>
                   </button>
-
                   <button
                     onClick={replayLastSpeech}
-                    className="py-2 px-3 border border-slate-800 hover:bg-slate-800 text-slate-350 rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 focus:outline-none"
-                    title="Repeat last assistant readout response"
+                    className="flex items-center gap-1 text-[#718096] hover:text-[#2F6FED] transition font-medium"
                   >
-                    <Play className="w-3 h-3 fill-current" /> Repeat
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Repeat</span>
                   </button>
-                </div>
-
-                {/* Try Voice Demo button */}
-                <button
-                  onClick={triggerVoiceDemo}
-                  className="w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-[10px] transition focus:outline-none flex items-center justify-center gap-1"
-                >
-                  <Sparkles className="w-3.5 h-3.5 fill-current" /> Try Voice Demo
-                </button>
-
-                {/* Help Collapse triggers */}
-                <div className="pt-2 border-t border-slate-850 text-center">
-                  <button
-                    onClick={() => setShowHelp(!showHelp)}
-                    className="text-[10px] font-bold text-slate-500 hover:text-slate-300 flex items-center justify-center gap-1 mx-auto transition focus:outline-none"
-                  >
-                    <HelpCircle className="w-3.5 h-3.5" />
-                    <span>{showHelp ? 'Hide available commands' : 'What can I say?'}</span>
-                  </button>
-
-                  {showHelp && (
-                    <div className="mt-3 p-3 bg-slate-950 text-[10px] text-left text-slate-400 rounded-xl max-h-40 overflow-y-auto space-y-2 leading-relaxed">
-                      <div>
-                        <span className="font-bold text-slate-300 block">General Actions</span>
-                        <p>• &ldquo;Click Get Started&rdquo;</p>
-                        <p>• &ldquo;Go to my profile&rdquo;</p>
-                      </div>
-                      <div>
-                        <span className="font-bold text-slate-300 block">Forms & Preferences</span>
-                        <p>• &ldquo;My name is Vayu&rdquo;</p>
-                        <p>• &ldquo;Select remote work&rdquo;</p>
-                      </div>
-                      <div>
-                        <span className="font-bold text-slate-300 block">Jobs Board</span>
-                        <p>• &ldquo;Find remote AI jobs&rdquo;</p>
-                        <p>• &ldquo;Open the first job&rdquo;</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </>
             )}
 
-            {/* TAB 2: SPOKEN TEXT LOG HISTORY PANEL */}
+            {/* View 2: Logs */}
             {showLogs && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-extrabold text-slate-300">📜 Spoken Voice Logs</span>
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#718096] uppercase tracking-wider">Spoken Utterances</span>
+                  <div className="flex gap-2">
                     <button
                       onClick={copyLogsToClipboard}
-                      disabled={voiceLogs.length === 0}
-                      className="p-1.5 text-[10px] font-bold bg-slate-800 hover:bg-slate-750 disabled:opacity-40 text-slate-300 rounded-lg flex items-center gap-1 transition"
-                      title="Copy logs to clipboard"
+                      className="text-[10px] font-semibold text-[#2F6FED] hover:underline flex items-center gap-1"
                     >
-                      {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                      <span>{copied ? 'Copied!' : 'Copy'}</span>
+                      {copied ? <Check className="w-3 h-3 text-[#16A36A]" /> : <Copy className="w-3 h-3" />}
+                      <span>{copied ? 'Copied' : 'Copy'}</span>
                     </button>
                     <button
                       onClick={clearVoiceLogs}
-                      disabled={voiceLogs.length === 0}
-                      className="p-1.5 text-[10px] font-bold bg-slate-800 hover:bg-red-950 hover:text-red-400 disabled:opacity-40 text-slate-400 rounded-lg transition"
-                      title="Clear logs"
+                      className="text-[10px] font-semibold text-[#D64545] hover:underline"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      Clear
                     </button>
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 max-h-64 overflow-y-auto space-y-2 scrollbar-thin">
+                <div className="max-h-44 overflow-y-auto space-y-2 text-xs p-2 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl scrollbar-none">
                   {voiceLogs.length === 0 ? (
-                    <p className="text-[11px] text-slate-500 italic text-center py-6">
-                      No spoken text logged yet. Speak into your mic to see text appear here!
-                    </p>
+                    <p className="text-[11px] text-[#A0A9B8] text-center py-4">No utterances recorded yet.</p>
                   ) : (
-                    voiceLogs.map((log) => (
-                      <div 
-                        key={log.id} 
-                        className="p-2 bg-slate-900 border border-slate-800/80 rounded-xl space-y-0.5 text-[11px]"
-                      >
-                        <div className="flex items-center justify-between text-[9px] text-slate-400">
-                          <span className="font-bold text-emerald-400">🗣️ User Voice</span>
+                    voiceLogs.map((log, idx) => (
+                      <div key={idx} className="p-2 bg-white rounded-lg border border-[#DCE5F0] text-[11px]">
+                        <div className="flex justify-between text-[9px] text-[#718096] mb-0.5">
+                          <span className="font-bold text-[#2F6FED] uppercase">{log.source}</span>
                           <span>{log.timestamp}</span>
                         </div>
-                        <p className="text-slate-200 font-medium whitespace-pre-wrap leading-snug">
-                          &ldquo;{log.text}&rdquo;
-                        </p>
+                        <p className="text-[#172033] font-medium">{log.text}</p>
                       </div>
                     ))
                   )}
                 </div>
-
-                <button
-                  onClick={() => setShowLogs(false)}
-                  className="w-full py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold rounded-xl text-[10px] transition"
-                >
-                  ← Back to Voice Control
-                </button>
               </div>
             )}
 
           </div>
         )}
-
       </div>
     </>
   );
 }
-

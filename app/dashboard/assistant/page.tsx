@@ -3,8 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { aiService } from '@/services/ai';
+import PageHeader from '@/components/ui/PageHeader';
 import { speechService } from '@/services/speech';
-import { demoCandidate, seedJobs } from '@/database/seed-data';
+import { demoCandidate } from '@/database/seed-data';
 import { 
   Sparkles, 
   Send, 
@@ -13,15 +14,13 @@ import {
   Volume2, 
   VolumeX, 
   RefreshCw, 
-  AlertCircle,
-  User,
-  Award,
-  Accessibility,
-  TrendingUp,
-  HelpCircle,
-  FileText,
+  User, 
+  Award, 
+  ShieldCheck, 
+  Bot,
   Briefcase
 } from 'lucide-react';
+import SurfaceCard from '@/components/ui/SurfaceCard';
 
 interface ChatMessage {
   id: string;
@@ -30,23 +29,24 @@ interface ChatMessage {
 }
 
 export default function AssistantPage() {
-  // Load candidate profile dynamically from localStorage
   const [candidate, setCandidate] = useState<{ profile: any; accessibility: any; skills: string[] }>(demoCandidate);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: '1', role: 'assistant', content: "Hello! I am your OpenAbility Career Companion. Review your stats on the right and ask me questions about jobs, skills gaps, or learning paths." }
+    { 
+      id: '1', 
+      role: 'assistant', 
+      content: "Hello! I am your InnoSkill AI Career Companion. Review your candidate stats on the right and ask me questions about suitable jobs, skill gap closure, or interview preparation." 
+    }
   ]);
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUserMessage, setLastUserMessage] = useState('');
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('openability_candidate');
+      const stored = localStorage.getItem('innoskill_candidate') || localStorage.getItem('openability_candidate');
       if (stored) {
         try {
           setCandidate(JSON.parse(stored));
@@ -59,9 +59,8 @@ export default function AssistantPage() {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isTyping]);
 
-  // Clean speech synthesis if leaving page
   useEffect(() => {
     return () => {
       speechService.stopSpeaking();
@@ -69,50 +68,21 @@ export default function AssistantPage() {
     };
   }, []);
 
-  // Streaming typewriter animation helper
-  const simulateStreaming = (fullText: string) => {
-    setIsTyping(true);
-    let currentText = '';
-    const words = fullText.split(' ');
-    let idx = 0;
-    
-    const tempId = Date.now().toString();
-    setMessages(prev => [...prev, { id: tempId, role: 'user', content: lastUserMessage }]); // wait, user message was already added in handleSend
-    
-    // Add typing slot
-    setMessages(prev => {
-      // Find and remove if duplicate user message exists or just append assistant slot
-      return [...prev, { id: tempId, role: 'assistant', content: '' }];
-    });
-
-    const interval = setInterval(() => {
-      if (idx < words.length) {
-        currentText += (idx === 0 ? '' : ' ') + words[idx];
-        setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: currentText } : m));
-        idx++;
-      } else {
-        clearInterval(interval);
-        setIsTyping(false);
-        if (ttsEnabled) {
-          speechService.speak(fullText);
-        }
-      }
-    }, 30);
-  };
-
   const handleSend = async (textToSend: string) => {
     if (!textToSend.trim()) return;
 
     if (isListening) {
-      stopListening();
+      speechService.stopListening();
+      setIsListening(false);
     }
 
-    setError(null);
-    setLastUserMessage(textToSend);
-    
-    // Append User Message
-    const userMsgId = 'user-' + Date.now();
-    setMessages(prev => [...prev, { id: userMsgId, role: 'user', content: textToSend }]);
+    const userMsg: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: textToSend
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
 
@@ -120,269 +90,232 @@ export default function AssistantPage() {
       const response = await aiService.chatWithAssistant(
         textToSend,
         {
-          fullName: candidate.profile.fullName,
+          fullName: candidate.profile?.fullName || 'Candidate',
           skills: candidate.skills,
           accessibility: candidate.accessibility
         },
-        messages.map(m => ({ role: m.role, content: m.content }))
+        messages
       );
 
-      // Trigger typewriter effect
-      setIsTyping(false);
-      simulateStreaming(response);
-    } catch (e) {
-      setError('Connection to AI service failed. Would you like to retry?');
-      setIsTyping(false);
-    }
-  };
+      const aiMsg: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        role: 'assistant',
+        content: response
+      };
 
-  const handleRetry = () => {
-    if (lastUserMessage) {
-      handleSend(lastUserMessage);
-    }
-  };
+      setMessages((prev) => [...prev, aiMsg]);
 
-  const startListening = () => {
-    setIsListening(true);
-    speechService.startListening(
-      (result) => {
-        setInput(result);
-        setIsListening(false);
-        handleSend(result);
-      },
-      (error) => {
-        console.error(error);
-        setIsListening(false);
+      if (ttsEnabled) {
+        speechService.speak(response);
       }
-    );
+    } catch (e) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-err-${Date.now()}`,
+          role: 'assistant',
+          content: "I ran into a temporary issue connecting to the inference engine. Please try again."
+        }
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
-  const stopListening = () => {
-    speechService.stopListening();
-    setIsListening(false);
+  const handleToggleListening = () => {
+    if (isListening) {
+      speechService.stopListening();
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      speechService.startListening(
+        (transcript) => {
+          setInput(transcript);
+          setIsListening(false);
+          handleSend(transcript);
+        },
+        (error) => {
+          console.error(error);
+          setIsListening(false);
+        }
+      );
+    }
   };
-
-  const toggleListening = () => {
-    if (isListening) stopListening();
-    else startListening();
-  };
-
-  const profile = candidate.profile;
-  const access = candidate.accessibility;
-  const skills = candidate.skills;
-
-  // Mock gaps for side-panel representation
-  const targetCareer = profile.targetRoles[0] || 'Accessible UI Engineer';
-  const gaps = ['Node.js', 'PostgreSQL', 'Docker', 'AWS'];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 select-none">
       
-      {/* Title */}
-      <div className="space-y-1">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white">AI Career Companion</h2>
-        <p className="text-xs sm:text-sm text-slate-500">
-          Have a contextual discussion about your skills, gaps, and job compatibility options.
-        </p>
-      </div>
+      <PageHeader 
+        eyebrow="Interactive Coaching" 
+        title="AI Career Companion Workspace" 
+        description="Collaborate with your dedicated AI advisor on resume refinements, career pivots, and accommodation negotiation strategies." 
+        icon={Bot} 
+      />
 
-      {/* Main Grid: Left Conversation, Right Context Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Main Split Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-[calc(100vh-230px)] min-h-[580px]">
         
-        {/* Left Column: Conversation (8 Cols) */}
-        <div className="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl flex flex-col h-[580px] overflow-hidden shadow-sm">
+        {/* Chat Conversation Area (8 Cols) */}
+        <div className="lg:col-span-8 flex flex-col h-full surface-card border border-[#DCE5F0] bg-white overflow-hidden shadow-sm">
           
-          {/* Header */}
-          <div className="bg-slate-900 p-4 text-white flex items-center justify-between border-b border-slate-800">
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
+          {/* Conversation Header */}
+          <div className="px-6 py-4 border-b border-[#DCE5F0] flex items-center justify-between bg-white">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+                <Sparkles className="w-4 h-4" />
+              </span>
               <div>
-                <h3 className="font-bold text-sm">Interactive Session</h3>
-                <span className="text-[10px] text-slate-400">Context: {profile.fullName}</span>
+                <h3 className="font-bold text-sm text-[#172033]">Adaptive Career Dialogue</h3>
+                <span className="text-[10px] text-[#16A36A] font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#16A36A]" /> Active Session
+                </span>
               </div>
             </div>
+
             <button
               onClick={() => setTtsEnabled(!ttsEnabled)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition focus:outline-none focus:ring-1 focus:ring-emerald-400 ${
+              className={`p-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition ${
                 ttsEnabled 
-                  ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400' 
-                  : 'border-slate-700 text-slate-400 hover:bg-slate-800'
+                  ? 'bg-[#EAF2FF] border-[#2F6FED] text-[#2F6FED]' 
+                  : 'bg-white border-[#DCE5F0] text-[#718096] hover:bg-[#F7F9FC]'
               }`}
+              title="Toggle audio response playback"
             >
               {ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              <span>{ttsEnabled ? 'Voice Aloud: On' : 'Voice Aloud: Off'}</span>
+              <span className="hidden sm:inline">{ttsEnabled ? 'Audio Speech On' : 'Audio Speech Off'}</span>
             </button>
           </div>
 
-          {/* Messages Body */}
-          <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/20 dark:bg-slate-950/10">
+          {/* Messages Stream */}
+          <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-[#F7F9FC]">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-xs sm:text-sm shadow-sm ${
+                  className={`max-w-[82%] rounded-2xl px-5 py-3 text-xs sm:text-sm leading-relaxed shadow-xs ${
                     msg.role === 'user'
-                      ? 'bg-slate-900 text-white rounded-tr-none'
-                      : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none'
+                      ? 'bg-[#2F6FED] text-white rounded-tr-xs'
+                      : 'bg-white border border-[#DCE5F0] text-[#172033] rounded-tl-xs'
                   }`}
                 >
-                  <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
                 </div>
               </div>
             ))}
 
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl rounded-tl-none px-4 py-2.5 shadow-sm text-sm text-slate-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="bg-white border border-[#DCE5F0] rounded-2xl rounded-tl-xs px-5 py-3 shadow-xs text-xs text-[#718096] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-[#2F6FED] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-[#2F6FED] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-[#2F6FED] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-              </div>
-            )}
-
-            {error && (
-              <div className="p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-red-700 dark:text-red-400 text-xs flex items-center justify-between gap-3 animate-in slide-in-from-bottom-2">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-                <button
-                  onClick={handleRetry}
-                  className="px-3 py-1.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-bold text-[10px] flex items-center gap-1 transition"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" /> Retry
-                </button>
               </div>
             )}
 
             <div ref={chatEndRef} />
           </div>
 
-          {/* Quick Actions / Shortcuts Panel */}
-          <div className="px-4 py-2 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap">
+          {/* Starter Suggestions Strip */}
+          <div className="px-5 py-2.5 bg-white border-t border-[#DCE5F0] flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap">
             {[
-              { text: "Analyze my resume", icon: FileText },
-              { text: "Find jobs for me", icon: Briefcase },
-              { text: "What skills am I missing?", icon: Award },
-              { text: "Build my learning roadmap", icon: TrendingUp },
-              { text: "Prepare for interview", icon: Mic },
-              { text: "Why was this job recommended?", icon: HelpCircle }
-            ].map((action, idx) => (
+              { label: '💼 Recommend positions', prompt: 'Which active jobs best match my skills and accommodations?' },
+              { label: '🎯 Close skill gaps', prompt: 'What specific skills should I learn to qualify for senior roles?' },
+              { label: '📝 Resume advice', prompt: 'How can I highlight my accessibility accommodation achievements?' },
+            ].map((p, idx) => (
               <button
                 key={idx}
-                onClick={() => handleSend(action.text)}
-                className="text-[10px] font-bold text-slate-600 dark:text-slate-350 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-xl hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 transition focus:outline-none"
+                onClick={() => handleSend(p.prompt)}
+                className="text-[11px] font-semibold text-[#4B5870] bg-[#F7F9FC] border border-[#DCE5F0] px-3 py-1 rounded-xl hover:border-[#2F6FED] hover:text-[#2F6FED] hover:bg-[#EAF2FF] transition cursor-pointer"
               >
-                <action.icon className="w-3 h-3 text-slate-400 shrink-0" />
-                <span>{action.text}</span>
+                {p.label}
               </button>
             ))}
           </div>
 
-          {/* Message Input Footer Form */}
+          {/* Message Composer Footer */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSend(input);
             }}
-            className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2"
+            className="p-4 bg-white border-t border-[#DCE5F0] flex items-center gap-2.5"
           >
             <button
               type="button"
-              onClick={toggleListening}
-              className={`p-3 rounded-xl transition flex items-center justify-center shrink-0 border focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
+              onClick={handleToggleListening}
+              className={`p-3 rounded-xl transition flex items-center justify-center shrink-0 border cursor-pointer ${
                 isListening 
-                  ? 'bg-red-50 border-red-200 text-red-500 animate-pulse' 
-                  : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'
+                  ? 'bg-red-50 border-red-300 text-red-600 animate-pulse' 
+                  : 'bg-[#F7F9FC] hover:bg-[#EAF2FF] border-[#DCE5F0] text-[#718096] hover:text-[#2F6FED]'
               }`}
-              title={isListening ? "Stop listening" : "Record voice response"}
+              title={isListening ? "Stop voice input" : "Speak question"}
             >
-              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              {isListening ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
             </button>
+
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about your candidate path..."
-              className="flex-1 text-sm bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:text-white"
+              placeholder="Ask your AI companion anything about your career path..."
+              className="flex-1 input-pearl text-xs sm:text-sm"
             />
+
             <button
               type="submit"
               disabled={!input.trim()}
-              className="px-5 py-3 rounded-xl bg-slate-900 dark:bg-emerald-600 dark:text-slate-950 text-white hover:bg-slate-850 disabled:opacity-50 text-xs font-bold transition focus:outline-none"
+              className="button-primary !py-2.5 !px-4"
+              aria-label="Send message"
             >
-              Send Message
+              <Send className="w-4 h-4" />
             </button>
           </form>
 
         </div>
 
-        {/* Right Column: Career Context Panel (4 Cols) */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-800 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-              <User className="w-4 h-4 text-emerald-500" /> Career Context
+        {/* Candidate Context Sidebar (4 Cols) */}
+        <div className="lg:col-span-4 space-y-5 h-full flex flex-col">
+          
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2 flex items-center gap-2">
+              <User className="w-4 h-4 text-[#2F6FED]" /> Active Candidate Context
             </h3>
 
-            {/* Candidate summary */}
-            <div className="space-y-1.5 text-xs">
-              <span className="font-bold text-slate-400 block">Candidate Profile</span>
-              <p className="font-bold text-slate-800 dark:text-white">{profile.fullName}</p>
-              <p className="text-slate-500 mt-1 leading-normal">{profile.bio}</p>
-            </div>
+            <div className="space-y-3 text-xs">
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl">
+                <span className="text-[10px] font-bold text-[#718096] uppercase">Name</span>
+                <p className="font-bold text-[#172033] mt-0.5">{candidate.profile?.fullName || 'Candidate'}</p>
+              </div>
 
-            {/* Target goals */}
-            <div className="space-y-1.5 text-xs pt-3 border-t border-slate-100 dark:border-slate-850">
-              <span className="font-bold text-slate-400 block">Target Career Roles</span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {profile.targetRoles.map((role: string, idx: number) => (
-                  <span key={idx} className="px-2.5 py-1 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-md font-semibold text-[10px] text-slate-600 dark:text-slate-400">
-                    {role}
-                  </span>
-                ))}
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl">
+                <span className="text-[10px] font-bold text-[#718096] uppercase">Target Trajectory</span>
+                <p className="font-bold text-[#2F6FED] mt-0.5">{candidate.profile?.targetRoles?.[0] || 'Software Professional'}</p>
+              </div>
+
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl">
+                <span className="text-[10px] font-bold text-[#718096] uppercase">Preferred Mode</span>
+                <p className="font-bold text-[#172033] mt-0.5">{candidate.accessibility?.workPreference || 'Remote'}</p>
               </div>
             </div>
+          </SurfaceCard>
 
-            {/* Current Skills list */}
-            <div className="space-y-1.5 text-xs pt-3 border-t border-slate-100 dark:border-slate-850">
-              <span className="font-bold text-slate-400 block">Skills Extracted ({skills.length})</span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {skills.map((skill: string, idx: number) => (
-                  <span key={idx} className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-3 flex-1">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2 flex items-center gap-2">
+              <Award className="w-4 h-4 text-[#2F6FED]" /> Verified Competencies
+            </h3>
+            
+            <div className="flex flex-wrap gap-1.5">
+              {candidate.skills.map((s, idx) => (
+                <span key={idx} className="bg-[#EAF2FF] border border-[#C8D5E5] text-[#2F6FED] px-2.5 py-1 rounded-lg text-xs font-semibold">
+                  {s}
+                </span>
+              ))}
             </div>
+          </SurfaceCard>
 
-            {/* Skill Gaps */}
-            <div className="space-y-1.5 text-xs pt-3 border-t border-slate-100 dark:border-slate-850">
-              <span className="font-bold text-slate-400 block">Identified Skill Gaps ({gaps.length})</span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {gaps.map((gap, idx) => (
-                  <span key={idx} className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] text-amber-700 dark:text-amber-400 font-bold uppercase">
-                    {gap}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Accessibility settings */}
-            <div className="space-y-1.5 text-xs pt-3 border-t border-slate-100 dark:border-slate-850">
-              <span className="font-bold text-slate-400 block">Workspace Support Preferences</span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {access.accommodations.map((acc: string, idx: number) => (
-                  <span key={idx} className="px-2 py-0.5 bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded text-[9px] text-slate-500 dark:text-slate-400 font-semibold">
-                    {acc}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-          </div>
         </div>
 
       </div>

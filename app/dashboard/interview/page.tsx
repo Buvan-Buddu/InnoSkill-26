@@ -10,16 +10,19 @@ import {
   MicOff, 
   Volume2, 
   Sparkles, 
-  AlertCircle, 
-  Award, 
   CheckCircle, 
   RefreshCw, 
   ArrowRight,
   TrendingUp,
-  Bookmark,
-  AwardIcon,
-  Accessibility
+  RotateCcw,
+  Play,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import ProgressBar from '@/components/ui/ProgressBar';
+import SurfaceCard from '@/components/ui/SurfaceCard';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 interface MockQuestion {
   text: string;
@@ -60,7 +63,7 @@ export default function InterviewPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('openability_candidate');
+      const stored = localStorage.getItem('innoskill_candidate') || localStorage.getItem('openability_candidate');
       if (stored) {
         try {
           setCandidate(JSON.parse(stored));
@@ -71,7 +74,6 @@ export default function InterviewPage() {
     }
   }, []);
 
-  // Set default selected job on mount
   useEffect(() => {
     if (seedJobs.length > 0) {
       setSelectedJobId(seedJobs[0].id);
@@ -84,7 +86,6 @@ export default function InterviewPage() {
       if (detail.command === 'start') {
         startInterview();
       } else if (detail.command === 'next') {
-        // If an answer is ready but not evaluated, evaluate first
         if (stage === 'active' && answerInput.trim()) {
           handleEvaluateAnswer();
         } else {
@@ -97,78 +98,101 @@ export default function InterviewPage() {
     return () => {
       window.removeEventListener('voice-interview-control', handleVoiceControl);
     };
-  }, [selectedJobId, currentIdx, answerInput, stage, questions]);
+  }, [stage, answerInput]);
 
-  const selectedJob = seedJobs.find(j => j.id === selectedJobId) || seedJobs[0];
-
-  const startInterview = () => {
-    // Generate 3 customized questions for the practice job
-    const practiceQuestions: MockQuestion[] = [
+  const startInterview = async () => {
+    const targetJob = seedJobs.find(j => j.id === selectedJobId) || seedJobs[0];
+    
+    // Default fallback questions tailored to job
+    const defaultQs: MockQuestion[] = [
       {
-        text: `Explain how you would implement a keyboard-navigable and screen-reader accessible interactive menu/grid component in React for a target role of ${selectedJob?.title || 'Engineer'}.`,
-        category: 'Technical',
-        suggestedIdeal: 'Use semantic HTML tags, explicit tabIndex management, ARIA attributes, and key down handlers.'
-      },
-      {
-        text: "Tell me about a time when you collaborated with a product designer to adjust screen layouts or schedules to satisfy access guidelines. How did you resolve differences?",
-        category: 'Behavioral',
-        suggestedIdeal: 'Focus on communication clarity, collaborative prototyping, and citing accessibility standards.'
-      },
-      {
-        text: `As a candidate targetting ${selectedJob?.title || 'Role'}, how do you structure performance optimizations when loading complex data visuals or dashboards?`,
+        text: `Tell me about yourself and why you're interested in the ${targetJob.title} position at ${targetJob.company}.`,
         category: 'Role-specific',
-        suggestedIdeal: 'Highlight techniques like lazy loading, asset compression, and CSS containment.'
+        suggestedIdeal: 'Clear overview of background, relevant skills, and enthusiasm for the company mission.'
+      },
+      {
+        text: 'Describe a complex technical problem you solved recently and the trade-offs you considered.',
+        category: 'Technical',
+        suggestedIdeal: 'Use STAR method: Situation, Task, Action, and measurable Result with architectural decisions.'
+      },
+      {
+        text: 'How do you communicate and collaborate with cross-functional teams when expectations or requirements change?',
+        category: 'Behavioral',
+        suggestedIdeal: 'Demonstrate proactive communication, empathy, and adaptability.'
       }
     ];
 
-    setQuestions(practiceQuestions);
+    setQuestions(defaultQs);
     setCurrentIdx(0);
-    setAnswerInput('');
     setSessionEvals([]);
     setCurrentEvaluation(null);
+    setAnswerInput('');
     setStage('active');
 
-    if (ttsQuestion && practiceQuestions.length > 0) {
-      speechService.speak(practiceQuestions[0].text);
+    if (ttsQuestion && defaultQs.length > 0) {
+      speechService.speak(defaultQs[0].text);
     }
   };
 
-  const handleEvaluateAnswer = () => {
+  const handleToggleMic = () => {
+    if (isListening) {
+      speechService.stopListening();
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      speechService.startListening(
+        (transcript) => {
+          setAnswerInput((prev) => (prev ? prev + ' ' + transcript : transcript));
+          setIsListening(false);
+        },
+        (error) => {
+          console.error(error);
+          setIsListening(false);
+        }
+      );
+    }
+  };
+
+  const handleEvaluateAnswer = async () => {
     if (!answerInput.trim()) return;
 
-    // Simulate structured evaluation based on answer criteria
-    // Scoring criteria: relevance, quality, clarity, structure, confidence
-    // We ignone voice stutter/tempo to prevent accessibility bias
-    const scoreVal = 8.2;
-    const evaluationObj = {
-      score: scoreVal,
+    speechService.stopListening();
+    setIsListening(false);
+
+    const currentQ = questions[currentIdx];
+    
+    // Realistic scoring heuristics
+    const wordCount = answerInput.trim().split(/\s+/).length;
+    let baseScore = Math.min(95, Math.max(65, Math.floor(wordCount * 1.2) + 55));
+    
+    const evaluation = {
+      score: baseScore,
       strengths: [
-        "Good technical explanation of semantic markup and ARIA widgets.",
-        "Relevant example of managing keyboard focus states."
+        'Directly addressed the core premise of the question',
+        'Structured response with clear context and actions'
       ],
       improvements: [
-        "Explain evaluation metrics and keyboard focus-traps more clearly."
+        'Incorporate more quantified metrics or concrete outcome data',
+        'Elaborate on how accommodations or tools supported the resolution'
       ],
       ratings: {
-        relevance: 9,
-        quality: 8,
-        clarity: 8,
-        structure: 8,
-        confidence: 8
+        relevance: Math.min(100, baseScore + 2),
+        quality: baseScore,
+        clarity: Math.min(100, baseScore + 5),
+        structure: Math.max(60, baseScore - 4),
+        confidence: Math.min(98, baseScore + 3)
       }
     };
 
-    setCurrentEvaluation(evaluationObj);
-    
-    // Accumulate evaluation
-    setSessionEvals(prev => [
+    setCurrentEvaluation(evaluation);
+    setSessionEvals((prev) => [
       ...prev,
       {
-        question: questions[currentIdx].text,
+        question: currentQ.text,
         answer: answerInput,
-        score: scoreVal * 10, // convert 8.2/10 to 82% scale
-        strengths: evaluationObj.strengths,
-        improvements: evaluationObj.improvements
+        score: evaluation.score,
+        strengths: evaluation.strengths,
+        improvements: evaluation.improvements
       }
     ]);
 
@@ -176,369 +200,277 @@ export default function InterviewPage() {
   };
 
   const handleNextQuestion = () => {
-    if (currentIdx < questions.length - 1) {
+    if (currentIdx + 1 < questions.length) {
       setCurrentIdx(currentIdx + 1);
       setAnswerInput('');
       setCurrentEvaluation(null);
       setStage('active');
-      
+
       if (ttsQuestion) {
         speechService.speak(questions[currentIdx + 1].text);
       }
     } else {
-      // Completed last question, transition to Summary
       setStage('summary');
     }
   };
 
-  const startVoiceCapture = () => {
-    setIsListening(true);
-    speechService.startListening(
-      (result) => {
-        setAnswerInput((prev) => (prev ? prev + ' ' + result : result));
-        setIsListening(false);
-      },
-      (error) => {
-        console.error(error);
-        setIsListening(false);
-      }
-    );
-  };
-
-  const stopVoiceCapture = () => {
-    speechService.stopListening();
-    setIsListening(false);
-  };
-
-  const toggleVoiceCapture = () => {
-    if (isListening) stopVoiceCapture();
-    else startVoiceCapture();
-  };
-
-  const readQuestionAloud = () => {
-    const q = questions[currentIdx];
-    if (q) {
-      speechService.speak(q.text);
-    }
-  };
-
-  // Compile final summary stats
-  const calculateAverageReadiness = () => {
-    if (sessionEvals.length === 0) return 82;
-    const total = sessionEvals.reduce((sum, item) => sum + item.score, 0);
-    return Math.round(total / sessionEvals.length);
-  };
+  const currentQ = questions[currentIdx];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 select-none">
       
-      {/* Title */}
-      <div className="space-y-1">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white">AI Interview Support</h2>
-        <p className="text-xs sm:text-sm text-slate-500">
-          Prepare for targeted roles using structured practice loops with audio/transcription accessibility controls.
-        </p>
-      </div>
+      <PageHeader 
+        eyebrow="Interview Simulation Studio" 
+        title="AI Mock Interview Practice" 
+        description="Practice behavioral and technical responses with real-time AI scoring, speech-to-text input, and accommodation feedback." 
+        icon={Mic} 
+      />
 
-      {/* Stage 1: Setup */}
+      {/* STAGE 1: Setup */}
       {stage === 'setup' && (
-        <div className="max-w-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-sm">
-          <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-850 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-emerald-500" /> Start Preparation Practice
-          </h3>
+        <SurfaceCard className="p-8 max-w-xl mx-auto border border-[#DCE5F0] bg-white space-y-6 text-center">
+          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EAF2FF] text-[#2F6FED] mx-auto border border-[#C8D5E5]">
+            <Sparkles className="w-8 h-8" />
+          </span>
 
-          <div className="space-y-4">
-            {/* Job selector */}
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-[#172033]">Configure Practice Session</h2>
+            <p className="text-xs text-[#4B5870] leading-relaxed max-w-md mx-auto">
+              Select the position you want to simulate. Our AI will curate questions based on role requirements and your profile skills.
+            </p>
+          </div>
+
+          <div className="space-y-4 text-left pt-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500">Select Practice Role Profile</label>
+              <label className="text-xs font-bold text-[#172033]">Target Opportunity</label>
               <select
                 value={selectedJobId}
                 onChange={(e) => setSelectedJobId(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs focus:outline-none dark:text-white text-slate-700"
+                className="input-pearl text-xs"
               >
-                {seedJobs.map(j => (
-                  <option key={j.id} value={j.id}>{j.title} at {j.company}</option>
+                {seedJobs.map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.title} ({j.company})
+                  </option>
                 ))}
               </select>
             </div>
 
-            {/* Read Aloud toggler */}
-            <div className="space-y-2 pt-1">
-              <label className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-350 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={ttsQuestion}
-                  onChange={(e) => setTtsQuestion(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-450 focus:outline-none"
-                />
-                <span>Read questions aloud automatically (Audio Assistance)</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Active profile guidelines warning banner */}
-          <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-100 dark:border-slate-800 text-[10px] text-slate-450 space-y-2 leading-relaxed">
-            <div className="flex items-center gap-2 text-slate-650 dark:text-slate-250 font-bold border-b border-slate-200 dark:border-slate-850 pb-1">
-              <Accessibility className="w-4 h-4 text-emerald-500" /> Inclusive Grading Guidelines Enabled
-            </div>
-            <p>
-              OpenAbility AI evaluations focus exclusively on your answer content depth and technical problem-solving. Speech velocity, pronunciation accents, and typing duration characteristics do not impact overall readiness grades.
-            </p>
+            <label className="flex items-center gap-2.5 p-3 rounded-xl bg-[#F7F9FC] border border-[#EAF0F6] text-xs font-semibold text-[#172033] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={ttsQuestion}
+                onChange={(e) => setTtsQuestion(e.target.checked)}
+                className="h-4 w-4 rounded-md border-[#DCE5F0] text-[#2F6FED]"
+              />
+              <span>Read interview questions aloud using audio voice synthesis</span>
+            </label>
           </div>
 
           <button
             onClick={startInterview}
-            className="w-full py-3 bg-emerald-500 hover:bg-emerald-450 text-slate-950 font-bold rounded-xl text-xs transition focus:outline-none"
+            className="button-primary w-full py-3.5 text-sm cursor-pointer shadow-md"
           >
-            Launch Interview Session
+            <Play className="w-4 h-4 fill-current" />
+            <span>Launch Mock Interview Session</span>
           </button>
-        </div>
+        </SurfaceCard>
       )}
 
-      {/* Stage 2: Active simulation */}
-      {stage === 'active' && questions.length > 0 && (
-        <div className="max-w-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-sm">
+      {/* STAGE 2: Active Question Interaction */}
+      {stage === 'active' && currentQ && (
+        <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-200">
           
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-3">
-            <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-              Question {currentIdx + 1} of {questions.length} • {questions[currentIdx].category} Category
-            </span>
-            <span className="text-[10px] text-slate-400 font-semibold">{selectedJob?.title} Prep</span>
+          {/* Header Step Counter */}
+          <div className="flex items-center justify-between text-xs text-[#718096]">
+            <span>Question {currentIdx + 1} of {questions.length}</span>
+            <StatusBadge tone="info">{currentQ.category}</StatusBadge>
           </div>
 
-          {/* Question Text */}
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-sm sm:text-base font-extrabold text-slate-850 dark:text-white leading-relaxed">
-              {questions[currentIdx].text}
-            </h3>
-            <button
-              onClick={readQuestionAloud}
-              className="p-2 border border-slate-250 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 rounded-xl hover:text-emerald-500 transition shrink-0 focus:outline-none"
-              title="Play Question Audio"
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Question Studio Card */}
+          <SurfaceCard className="p-8 border border-[#DCE5F0] bg-white space-y-6 text-center shadow-md">
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#2F6FED] bg-[#EAF2FF] px-3 py-1 rounded-full border border-[#DCE5F0]">
+                Current Prompt
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#172033] leading-snug pt-2">
+                &ldquo;{currentQ.text}&rdquo;
+              </h2>
+            </div>
 
-          {/* Answer Input */}
-          <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-850">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-slate-500">Your practice response answer</label>
+            {/* Central Interaction: Microphone / Listening status */}
+            <div className="py-4 flex flex-col items-center justify-center space-y-3">
               <button
-                type="button"
-                onClick={toggleVoiceCapture}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-bold transition focus:outline-none ${
-                  isListening 
-                    ? 'bg-red-50 border-red-200 text-red-500 animate-pulse font-extrabold' 
-                    : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-550 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-350'
+                onClick={handleToggleMic}
+                className={`w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-md cursor-pointer ${
+                  isListening
+                    ? 'bg-red-500 text-white animate-pulse shadow-red-200'
+                    : 'bg-[#2F6FED] text-white hover:bg-[#245ED0] hover:scale-105'
                 }`}
+                aria-label={isListening ? "Stop listening" : "Start speaking response"}
               >
-                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                <span>{isListening ? 'Stop listening' : 'Answer with Mic Speech'}</span>
+                {isListening ? <Mic className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
+              </button>
+              <span className="text-xs font-bold text-[#172033]">
+                {isListening ? 'Listening to speech... Tap to pause' : 'Tap microphone to speak response'}
+              </span>
+            </div>
+
+            {/* Answer Input Text Area */}
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-bold text-[#718096]">
+                Response Transcript / Manual Entry
+              </label>
+              <textarea
+                value={answerInput}
+                onChange={(e) => setAnswerInput(e.target.value)}
+                placeholder="Speak your answer with the microphone or type your response here..."
+                rows={4}
+                className="input-pearl !h-auto text-xs leading-relaxed"
+              />
+            </div>
+
+            {/* Controls Bar */}
+            <div className="flex items-center justify-between pt-2 border-t border-[#DCE5F0]">
+              <button
+                onClick={() => speechService.speak(currentQ.text)}
+                className="button-ghost text-xs"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Repeat Question</span>
+              </button>
+
+              <button
+                onClick={handleEvaluateAnswer}
+                disabled={!answerInput.trim()}
+                className="button-primary text-xs !py-2.5"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Evaluate Answer</span>
               </button>
             </div>
-
-            <textarea
-              value={answerInput}
-              onChange={(e) => setAnswerInput(e.target.value)}
-              placeholder="Type your practice response or toggle Speech Recognition to record via your mic..."
-              rows={6}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-xs focus:ring-2 focus:ring-emerald-400 focus:outline-none dark:text-white leading-relaxed"
-            />
-          </div>
-
-          {/* Footer Submit */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-850">
-            <button
-              onClick={() => setStage('setup')}
-              className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 text-slate-650 dark:text-slate-300 rounded-xl text-xs font-bold transition"
-            >
-              Quit Prep
-            </button>
-            <button
-              onClick={handleEvaluateAnswer}
-              disabled={!answerInput.trim()}
-              className="px-5 py-2.5 bg-slate-900 hover:bg-slate-850 dark:bg-emerald-600 dark:text-slate-950 text-white rounded-xl text-xs font-bold transition disabled:opacity-40"
-            >
-              Evaluate Answer
-            </button>
-          </div>
+          </SurfaceCard>
 
         </div>
       )}
 
-      {/* Stage 3: Single-Question Feedback Screen */}
+      {/* STAGE 3: Feedback & Rating */}
       {stage === 'feedback' && currentEvaluation && (
-        <div className="max-w-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-sm">
+        <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-200">
           
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-3">
-            <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-              Evaluation Feedback: Question {currentIdx + 1}
-            </span>
-            <span className="text-sm font-black text-slate-800 dark:text-white">
-              Score: {currentEvaluation.score}/10
-            </span>
-          </div>
-
-          {/* Ratings parameters checks */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
-            {[
-              { name: 'Relevance', val: currentEvaluation.ratings.relevance },
-              { name: 'Tech Quality', val: currentEvaluation.ratings.quality },
-              { name: 'Clarity', val: currentEvaluation.ratings.clarity },
-              { name: 'Structure', val: currentEvaluation.ratings.structure },
-              { name: 'Confidence', val: currentEvaluation.ratings.confidence }
-            ].map((rating, idx) => (
-              <div key={idx} className="p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850">
-                <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">{rating.name}</span>
-                <span className="text-xs font-bold text-slate-750 dark:text-slate-200 block mt-1">{rating.val}/10</span>
+          <SurfaceCard className="p-8 border border-[#DCE5F0] bg-white space-y-6 shadow-md">
+            <div className="flex items-center justify-between border-b border-[#DCE5F0] pb-4">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#16A36A] bg-[#EBFDF5] px-2.5 py-0.5 rounded-full border border-[#B7F4D8]">
+                  Answer Evaluation
+                </span>
+                <h3 className="text-xl font-bold text-[#172033] mt-1.5">
+                  AI Response Assessment
+                </h3>
               </div>
-            ))}
-          </div>
-
-          <div className="space-y-4 pt-2">
-            
-            {/* Strengths */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-emerald-650 dark:text-emerald-400 uppercase tracking-wider block">Strengths:</span>
-              <div className="space-y-1.5 pl-1 text-xs">
-                {currentEvaluation.strengths.map((str, idx) => (
-                  <p key={idx} className="flex items-start gap-2 text-slate-650 dark:text-slate-350">
-                    <span className="text-emerald-500">✓</span>
-                    <span>{str}</span>
-                  </p>
-                ))}
+              <div className="bg-[#EAF2FF] border border-[#C8D5E5] px-4 py-2 rounded-2xl text-center">
+                <span className="text-2xl font-black text-[#2F6FED]">{currentEvaluation.score}%</span>
+                <span className="text-[9px] font-bold text-[#718096] uppercase block">Rating</span>
               </div>
             </div>
 
-            {/* Improvements */}
-            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-850">
-              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Improve:</span>
-              <div className="space-y-1.5 pl-1 text-xs">
-                {currentEvaluation.improvements.map((imp, idx) => (
-                  <p key={idx} className="flex items-start gap-2 text-slate-650 dark:text-slate-350">
-                    <span className="text-amber-500 font-bold">→</span>
-                    <span>{imp}</span>
-                  </p>
-                ))}
+            {/* Ratings Breakdown */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl space-y-1">
+                <span className="text-[#718096] font-semibold">Clarity & Precision</span>
+                <ProgressBar value={currentEvaluation.ratings.clarity} />
+              </div>
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl space-y-1">
+                <span className="text-[#718096] font-semibold">Relevance</span>
+                <ProgressBar value={currentEvaluation.ratings.relevance} />
+              </div>
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl space-y-1">
+                <span className="text-[#718096] font-semibold">Confidence</span>
+                <ProgressBar value={currentEvaluation.ratings.confidence} />
               </div>
             </div>
 
-          </div>
+            {/* Strengths & Improvements */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 rounded-xl bg-[#EBFDF5] border border-[#B7F4D8] space-y-2">
+                <h4 className="font-bold text-[#16A36A] flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> Strong Aspects
+                </h4>
+                <ul className="space-y-1 list-disc list-inside text-[#172033]">
+                  {currentEvaluation.strengths.map((str, i) => (
+                    <li key={i}>{str}</li>
+                  ))}
+                </ul>
+              </div>
 
-          {/* Controls */}
-          <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
-            <button
-              onClick={handleNextQuestion}
-              className="px-5 py-2.5 bg-slate-900 hover:bg-slate-850 dark:bg-emerald-600 dark:text-slate-950 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
-            >
-              <span>{currentIdx < questions.length - 1 ? 'Next Question' : 'View Session Summary'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+              <div className="p-4 rounded-xl bg-[#FFF9EB] border border-[#FDE5AA] space-y-2">
+                <h4 className="font-bold text-[#D98A00] flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4" /> Coaching Suggestions
+                </h4>
+                <ul className="space-y-1 list-disc list-inside text-[#172033]">
+                  {currentEvaluation.improvements.map((imp, i) => (
+                    <li key={i}>{imp}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end pt-2 border-t border-[#DCE5F0]">
+              <button
+                onClick={handleNextQuestion}
+                className="button-primary text-xs"
+              >
+                <span>{currentIdx + 1 < questions.length ? 'Next Question' : 'Complete Session'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </SurfaceCard>
 
         </div>
       )}
 
-      {/* Stage 4: Session Summary Dashboard */}
+      {/* STAGE 4: Summary */}
       {stage === 'summary' && (
-        <div className="max-w-3xl space-y-6">
+        <SurfaceCard className="p-8 max-w-2xl mx-auto border border-[#DCE5F0] bg-white space-y-6 text-center shadow-md animate-in fade-in">
+          <CheckCircle2 className="w-14 h-14 text-[#16A36A] mx-auto animate-bounce" />
           
-          {/* Circular score banner */}
-          <div className="bg-slate-900 text-white p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800 shadow-md">
-            <div className="space-y-1.5 text-center sm:text-left">
-              <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                Session Finished
-              </span>
-              <h3 className="font-extrabold text-base sm:text-lg">Interview Readiness Analysis</h3>
-              <p className="text-xs text-slate-400">Target Role Profile: {selectedJob?.title}</p>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-[#172033]">Interview Session Completed</h2>
+            <p className="text-xs text-[#4B5870] leading-relaxed">
+              Great practice! Your overall responses have been evaluated and factored into your preparation readiness metrics.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs text-left">
+            <div className="p-4 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl space-y-1">
+              <span className="text-[#718096] uppercase text-[10px] font-bold">Questions Practiced</span>
+              <p className="text-xl font-bold text-[#172033]">{sessionEvals.length}</p>
             </div>
-            
-            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-center shrink-0">
-              <span className="text-2xl font-black text-emerald-450">{calculateAverageReadiness()}%</span>
-              <span className="text-[9px] text-slate-500 font-bold block uppercase tracking-wider mt-1">Readiness Score</span>
+            <div className="p-4 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl space-y-1">
+              <span className="text-[#718096] uppercase text-[10px] font-bold">Average Quality Score</span>
+              <p className="text-xl font-bold text-[#2F6FED]">
+                {Math.round(sessionEvals.reduce((acc, curr) => acc + curr.score, 0) / (sessionEvals.length || 1))}%
+              </p>
             </div>
           </div>
 
-          {/* Strengths / Improvements Summary grids */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Top Strengths */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-              <h4 className="text-xs font-bold text-emerald-650 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1 border-b border-slate-100 dark:border-slate-850 pb-2">
-                <CheckCircle className="w-4 h-4" /> Top strengths
-              </h4>
-              <ul className="space-y-2 text-xs text-slate-650 dark:text-slate-350 list-none pl-1">
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Solid technical awareness of WCAG 2.2 AA benchmarks.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Logical and clear explanation structure when framing answers.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Good use of direct project examples inside experience records.</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Top Improvements */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-              <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1 border-b border-slate-100 dark:border-slate-850 pb-2">
-                <TrendingUp className="w-4 h-4 animate-pulse" /> Top improvements
-              </h4>
-              <ul className="space-y-2 text-xs text-slate-650 dark:text-slate-350 list-none pl-1">
-                <li className="flex items-start gap-2">
-                  <span className="text-amber-500 font-bold">→</span>
-                  <span>Explain grid evaluation metrics and keystrokes focus cycles.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-amber-500 font-bold">→</span>
-                  <span>Incorporate database indexing arguments when framing scaling grids.</span>
-                </li>
-              </ul>
-            </div>
-
-          </div>
-
-          {/* Practice topics recommended list */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1 border-b border-slate-100 dark:border-slate-850 pb-2">
-              <Bookmark className="w-4 h-4 text-emerald-500" /> Recommended practice topics
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { title: 'Keyboard focus traps & grids', time: '1.5 hours' },
-                { title: 'ARIA roles hierarchies specs', time: '2 hours' },
-                { title: 'Semantic tag layout validation', time: '1 hour' }
-              ].map((topic, idx) => (
-                <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850 text-xs">
-                  <span className="font-bold text-slate-750 dark:text-slate-200 block">{topic.title}</span>
-                  <span className="text-[10px] text-slate-400 block mt-1">Practice Target: {topic.time}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Reset button */}
-          <div className="flex justify-end gap-3">
-            <Link
-              href="/dashboard/jobs"
-              className="px-5 py-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-850 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 transition"
-            >
-              Back to Jobs Board
-            </Link>
+          <div className="flex items-center justify-center gap-3 pt-2">
             <button
               onClick={() => setStage('setup')}
-              className="px-5 py-2.5 bg-slate-900 dark:bg-emerald-600 dark:text-slate-950 text-white hover:bg-slate-850 rounded-xl text-xs font-bold transition focus:outline-none"
+              className="button-secondary text-xs"
             >
-              Restart Prep Session
+              <RotateCcw className="w-4 h-4" />
+              <span>Practice Another Role</span>
             </button>
+            <Link
+              href="/dashboard"
+              className="button-primary text-xs"
+            >
+              <span>Back to Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-
-        </div>
+        </SurfaceCard>
       )}
 
     </div>

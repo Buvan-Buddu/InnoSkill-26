@@ -124,7 +124,7 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
   };
 
   const [status, setStatus] = useState<VoiceStatus>('IDLE');
-  const [feedback, setFeedback] = useState<string>("Ask OpenAbility");
+  const [feedback, setFeedback] = useState<string>("Ask InnoSkill");
   const [transcript, setTranscript] = useState<string>('');
   const [voiceLogs, setVoiceLogs] = useState<VoiceLogEntry[]>([]);
 
@@ -295,8 +295,8 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
     }).catch(e => console.warn('[VoiceAgent] AudioWorklet PCM recorder start notice:', e));
 
     const greeting = activeLanguageRef.current === 'hi-IN'
-      ? "नमस्कार, ओपनएबिलिटी में आपका स्वागत है। क्या आप जारी रखना चाहते हैं? कृपया हां या ना कहें।"
-      : "Welcome to OpenAbility AI. Would you like to proceed? Please say Yes or No.";
+      ? "नमस्कार, इननोस्किल एआई में आपका स्वागत है। क्या आप जारी रखना चाहते हैं? कृपया हां या ना कहें।"
+      : "Welcome to InnoSkill AI. Would you like to proceed? Please say Yes or No.";
     speakQuestionThenListen(greeting, 'VOICE_MODE_QUESTION');
   };
 
@@ -338,8 +338,8 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
     isNavigatingRef.current = false;
 
     const msg = targetLang === 'hi-IN'
-      ? "हिंदी चुनी गई है। क्या आपका OpenAbility AI पर पहले से अकाउंट है? अगर है, तो Login चुनें। अगर नहीं है, तो Create Account चुनें।"
-      : "English selected. Do you already have an account with OpenAbility AI? If you do, choose Login. If you don't, choose Create Account.";
+      ? "हिंदी चुनी गई है। क्या आपका InnoSkill AI पर पहले से अकाउंट है? अगर है, तो Login चुनें। अगर नहीं है, तो Create Account चुनें।"
+      : "English selected. Do you already have an account with InnoSkill AI? If you do, choose Login. If you don't, choose Create Account.";
 
     speakQuestionThenListen(msg, 'AUTH_METHOD_QUESTION');
   };
@@ -533,7 +533,7 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
             return;
           }
           setStatus('IDLE');
-          setFeedback("Ask OpenAbility");
+          setFeedback("Ask InnoSkill");
           return;
         }
 
@@ -554,7 +554,7 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
     speechService.stopListening();
     speechService.stopSpeaking();
     setStatus('IDLE');
-    setFeedback("Ask OpenAbility");
+    setFeedback("Ask InnoSkill");
   };
 
   const toggleAgentListening = () => {
@@ -566,7 +566,7 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
   const startVoiceOnboarding = () => {
     setOnboardingStep('NAME');
     setStatus('ONBOARDING');
-    const prompt = "Welcome to OpenAbility! Your ability. Your career. Your way. Let's set up your career profile through voice. First, what should I call you?";
+    const prompt = "Welcome to InnoSkill AI! Inclusive Career Companion. Let's set up your career profile through voice. First, what should I call you?";
     setFeedback(prompt);
     speakFeedback(prompt, () => {
       startAgentListening();
@@ -716,11 +716,11 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
 
     if (text === 'repeat' || text === 'say again' || text === 'again') {
       if (entryState === 'VOICE_MODE_QUESTION') {
-        speakQuestionThenListen("Hi, welcome to OpenAbility. Would you like to use OpenAbility with your voice? Please say Yes or No.", 'VOICE_MODE_QUESTION');
+        speakQuestionThenListen("Hi, welcome to InnoSkill AI. Would you like to use InnoSkill AI with your voice? Please say Yes or No.", 'VOICE_MODE_QUESTION');
       } else if (entryState === 'LANGUAGE_QUESTION') {
         speakQuestionThenListen("Would you like to continue in English or Hindi?", 'LANGUAGE_QUESTION');
       } else if (entryState === 'AUTH_METHOD_QUESTION') {
-        speakQuestionThenListen("Do you already have an OpenAbility account, or would you like to create a new one?", 'AUTH_METHOD_QUESTION');
+        speakQuestionThenListen("Do you already have an InnoSkill AI account, or would you like to create a new one?", 'AUTH_METHOD_QUESTION');
       }
       return;
     }
@@ -868,7 +868,7 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
     // Voice Logout Command
     if (text.includes('log out') || text.includes('logout') || text.includes('sign out')) {
       setStatus('CONFIRM_LOGOUT');
-      const msg = "Are you sure you want to log out of OpenAbility?";
+      const msg = "Are you sure you want to log out of InnoSkill AI?";
       setFeedback(msg);
       speakFeedback(msg, () => startAgentListening());
       return;
@@ -878,7 +878,7 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
       if (text.includes('yes') || text.includes('sure') || text.includes('logout')) {
         auth.logout();
         setStatus('ENTRY_GREETING');
-        const msg = "You have been logged out successfully. Hello, welcome to OpenAbility. Would you like to use OpenAbility hands-free with your voice?";
+        const msg = "You have been logged out successfully. Hello, welcome to InnoSkill AI. Would you like to use InnoSkill AI hands-free with your voice?";
         setFeedback(msg);
         speakFeedback(msg, () => startAgentListening());
       } else {
@@ -1334,11 +1334,11 @@ export function VoiceAgentProvider({ children }: { children: React.ReactNode }) 
   // Structured Natural Page Reader for Blind Users
   const speakPageSummary = () => {
     const name = candidate.profile?.fullName || 'User';
-    let text = "You are browsing OpenAbility AI.";
+    let text = "You are browsing InnoSkill AI.";
 
     if (pathname === '/dashboard') {
       if (!candidate.profile?.fullName) {
-        text = "Welcome to OpenAbility! Your career profile is currently empty. Say 'Start Onboarding' or 'Create Profile' to set up your profile through voice.";
+        text = "Welcome to InnoSkill AI! Your career profile is currently empty. Say 'Start Onboarding' or 'Create Profile' to set up your profile through voice.";
       } else {
         text = `Welcome back, ${name}. You are on the Candidate Overview Dashboard. Your target role is ${candidate.profile.targetRoles[0] || 'Software Developer'}. You have ${candidate.skills.length} skills listed. Recommended job matches are ready on your jobs board.`;
       }

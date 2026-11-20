@@ -243,6 +243,10 @@ export const db = {
   // --- AUTH & USERS ---
   createUser(fullName: string, emailRaw: string, passwordRaw: string): { user: DbUser; profile: DbProfile } {
     const email = emailRaw.toLowerCase().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Please enter a valid email address.');
+    }
     const store = readDatabase();
 
     // Check unique normalized email constraint

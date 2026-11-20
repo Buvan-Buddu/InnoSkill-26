@@ -34,7 +34,7 @@ export class SkillsAgent {
       title: `Mastering ${skill}`,
       description: `Targeted course module to build proficiency in ${skill} for ${targetRole} roles.`,
       estimatedTime: '2 - 3 Weeks',
-      resource: `OpenAbility Interactive Skill Module: ${skill}`
+      resource: `InnoSkill AI Interactive Skill Module: ${skill}`
     }));
 
     return {

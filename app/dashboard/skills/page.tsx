@@ -2,72 +2,91 @@
 
 import React from 'react';
 import { demoCandidate } from '@/database/seed-data';
-import { Award, AlertCircle, BookOpen, Clock, Globe, ArrowRight, TrendingUp } from 'lucide-react';
+import { 
+  Award, 
+  AlertCircle, 
+  AlertTriangle,
+  BookOpen, 
+  Clock, 
+  ArrowRight, 
+  TrendingUp, 
+  CheckCircle2, 
+  Sparkles,
+  Milestone
+} from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import ProgressBar from '@/components/ui/ProgressBar';
+import SurfaceCard from '@/components/ui/SurfaceCard';
 
 export default function SkillsPage() {
   const profile = demoCandidate.profile;
   const skills = demoCandidate.skills;
 
-  // Mock career path data
-  const targetRole = profile.targetRoles[0] || 'Accessible UI Engineer';
+  const targetRole = profile.targetRoles[0] || 'Accessible UI Specialist';
   const currentSkills = skills;
-  const missingSkills = ['Node.js', 'PostgreSQL', 'CI/CD Pipelines (GitHub Actions)', 'GraphQL'];
+  const missingSkills = ['Node.js', 'PostgreSQL', 'CI/CD Automation (GitHub Actions)', 'GraphQL'];
 
   const learningPath = {
     timeline: '3 - 6 Months',
     courses: [
-      { name: 'Full-Stack Node.js Developer Suite', platform: 'Udemy / Coursera', duration: '40 hours' },
-      { name: 'Relational Database Design with PostgreSQL', platform: 'Pluralsight', duration: '25 hours' },
-      { name: 'Introduction to CI/CD & GitHub Actions', platform: 'GitHub Learning', duration: '12 hours' }
+      { name: 'Full-Stack Modern Web Engineering', platform: 'Udemy / Coursera', duration: '40 hours', progress: 60 },
+      { name: 'Relational Database Architecture with PostgreSQL', platform: 'Pluralsight', duration: '25 hours', progress: 30 },
+      { name: 'CI/CD Pipelines & Inclusive Testing', platform: 'GitHub Learning', duration: '15 hours', progress: 0 }
     ],
     certifications: [
-      { name: 'IAAP Web Accessibility Specialist (WAS)', difficulty: 'Intermediate', cost: 'Paid' },
-      { name: 'AWS Certified Cloud Practitioner', difficulty: 'Beginner', cost: 'Paid' }
+      { name: 'IAAP Web Accessibility Specialist (WAS)', status: 'In Preparation', level: 'Industry Standard' },
+      { name: 'Cloud Architecture Practitioner', status: 'Recommended', level: 'Foundational' }
     ]
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 select-none">
       
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white">Skills Gap & Career Roadmap</h2>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Compare your capabilities against your target role of <span className="font-bold text-emerald-500">{targetRole}</span> and enterprise requisitions.
-          </p>
-        </div>
-
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs shrink-0 self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="text-[11px] font-extrabold text-cyan-300">SAP SuccessFactors Competency Framework Active</span>
-        </div>
-      </div>
+      <PageHeader 
+        eyebrow="Career Roadmap" 
+        title="Skills Intelligence & Capabilities" 
+        description={`Assess your verified capabilities against ${targetRole} and explore your tailored learning timeline.`} 
+        icon={Award} 
+      />
 
       {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Skill Gap Comparison (7 Cols) */}
+        {/* Capabilities & Gap Analysis (7 Cols) */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-850 dark:text-white text-sm sm:text-base flex items-center gap-2">
-              <Award className="w-5 h-5 text-emerald-500" /> Capabilities Analysis
-            </h3>
+          
+          <SurfaceCard className="p-6 sm:p-7 border border-[#DCE5F0] bg-white space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-[#DCE5F0]">
+              <div className="flex items-center gap-2.5">
+                <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+                  <Award className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-bold text-sm text-[#172033]">Target Competency Alignment</h3>
+                  <p className="text-xs text-[#718096]">Benchmark against industry role requirements.</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-[#2F6FED] bg-[#EAF2FF] px-2.5 py-1 rounded-lg">
+                72% Prepared
+              </span>
+            </div>
 
             {/* Side-by-side lists */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Current */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              
+              {/* Current Verified Skills */}
               <div className="space-y-3">
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
-                  Your Current Skills ({currentSkills.length})
+                <span className="text-xs font-bold text-[#16A36A] uppercase tracking-wider block flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> Verified Skills ({currentSkills.length})
                 </span>
-                <div className="flex flex-col gap-2">
+                <div className="space-y-2">
                   {currentSkills.map((skill, idx) => (
                     <div 
                       key={idx} 
-                      className="p-2.5 rounded-xl border border-emerald-500/10 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs font-semibold"
+                      className="p-3 rounded-xl border border-[#B7F4D8] bg-[#EBFDF5] text-[#16A36A] text-xs font-bold flex items-center justify-between"
                     >
-                      ✓ {skill}
+                      <span>{skill}</span>
+                      <span className="text-[10px] uppercase font-semibold">Active</span>
                     </div>
                   ))}
                 </div>
@@ -75,88 +94,101 @@ export default function SkillsPage() {
 
               {/* Missing Gaps */}
               <div className="space-y-3">
-                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
-                  Target Role Gaps ({missingSkills.length})
+                <span className="text-xs font-bold text-[#D98A00] uppercase tracking-wider block flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4" /> Focus Gaps ({missingSkills.length})
                 </span>
-                <div className="flex flex-col gap-2">
+                <div className="space-y-2">
                   {missingSkills.map((skill, idx) => (
                     <div 
                       key={idx} 
-                      className="p-2.5 rounded-xl border border-amber-500/10 bg-amber-500/5 text-amber-700 dark:text-amber-400 text-xs font-semibold flex items-start gap-1.5"
+                      className="p-3 rounded-xl border border-[#FDE5AA] bg-[#FFF9EB] text-[#D98A00] text-xs font-bold flex items-center justify-between"
                     >
-                      <AlertCircle className="w-4 h-4 shrink-0" />
                       <span>{skill}</span>
+                      <span className="text-[10px] uppercase font-semibold">Priority</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Learning Roadmap (5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-850 dark:text-white text-sm sm:text-base flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-emerald-500" /> Career Guidance Roadmap
+            </div>
+          </SurfaceCard>
+
+          {/* Interactive Milestone Timeline */}
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2 flex items-center gap-2">
+              <Milestone className="w-4 h-4 text-[#2F6FED]" /> Roadmap Milestones
             </h3>
 
-            {/* Timeline */}
-            <div className="flex items-center gap-3 p-3 bg-slate-900 text-white rounded-xl border border-slate-800">
-              <Clock className="w-5 h-5 text-emerald-400 shrink-0" />
-              <div className="text-xs">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Estimated Prep Timeline</span>
-                <span className="font-bold">{learningPath.timeline}</span>
-              </div>
-            </div>
-
-            {/* Courses list */}
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-500 block">Recommended Training Courses</span>
-              <div className="space-y-2">
-                {learningPath.courses.map((course, idx) => (
-                  <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-xl space-y-1">
-                    <p className="text-xs font-bold text-slate-800 dark:text-white">{course.name}</p>
-                    <div className="flex items-center justify-between text-[10px] text-slate-400">
-                      <span>Source: {course.platform}</span>
-                      <span>Duration: {course.duration}</span>
-                    </div>
+            <div className="space-y-3 pt-1">
+              {[
+                { phase: 'Month 1 - 2', title: 'Backend & Data Persistence Foundations', desc: 'Complete Node.js runtime and PostgreSQL relational schemas.' },
+                { phase: 'Month 3 - 4', title: 'Accessible Architecture & CI/CD', desc: 'Implement automated axe-core accessibility unit tests in GitHub Actions.' },
+                { phase: 'Month 5 - 6', title: 'Portfolio Project & WAS Certification', desc: 'Deploy enterprise-accessible capstone and sit for IAAP WAS exam.' },
+              ].map((m, idx) => (
+                <div key={idx} className="p-4 rounded-xl bg-[#F7F9FC] border border-[#EAF0F6] space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#2F6FED] text-[11px] uppercase">{m.phase}</span>
+                    <span className="text-[10px] font-semibold text-[#718096]">Milestone {idx + 1}</span>
                   </div>
-                ))}
+                  <h4 className="font-bold text-[#172033] text-sm">{m.title}</h4>
+                  <p className="text-[#4B5870] leading-relaxed">{m.desc}</p>
+                </div>
+              ))}
+            </div>
+          </SurfaceCard>
+
+        </div>
+
+        {/* Guided Learning Plan (5 Cols) */}
+        <div className="lg:col-span-5 space-y-6">
+          
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-5">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-[#DCE5F0]">
+              <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+                <BookOpen className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="font-bold text-sm text-[#172033]">Recommended Courses</h3>
+                <p className="text-[11px] text-[#718096]">Curated curriculum to close key skill gaps.</p>
               </div>
             </div>
 
-            {/* Certifications list */}
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-500 block">Professional Certifications</span>
-              <div className="space-y-2">
-                {learningPath.certifications.map((cert, idx) => (
-                  <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 rounded-xl flex items-center justify-between">
+            <div className="space-y-3.5">
+              {learningPath.courses.map((course, idx) => (
+                <div key={idx} className="p-4 rounded-xl bg-[#F7F9FC] border border-[#EAF0F6] space-y-2.5 text-xs">
+                  <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-white">{cert.name}</p>
-                      <span className="text-[10px] text-slate-400">Difficulty: {cert.difficulty}</span>
+                      <h4 className="font-bold text-[#172033]">{course.name}</h4>
+                      <p className="text-[#718096] text-[11px]">{course.platform} • {course.duration}</p>
                     </div>
-                    <span className="text-[10px] bg-slate-900 text-white px-2 py-0.5 rounded uppercase font-bold tracking-wider">
-                      {cert.cost}
-                    </span>
                   </div>
-                ))}
-              </div>
+                  <ProgressBar value={course.progress} label="Module Progress" />
+                </div>
+              ))}
             </div>
+          </SurfaceCard>
 
-            {/* Next Step */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-850">
-              <p className="text-[10px] text-slate-400 leading-relaxed mb-3">
-                Need customized mentoring or assistance learning these gaps? Speak to your AI Companion.
-              </p>
-              <a 
-                href="/dashboard/assistant"
-                className="w-full py-2.5 bg-slate-900 dark:bg-emerald-600 dark:text-slate-950 text-white rounded-xl text-center text-xs font-bold hover:bg-slate-850 transition block"
-              >
-                Discuss with AI Assistant
-              </a>
+          {/* Certifications Card */}
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#2F6FED]" /> Target Certifications
+            </h3>
+
+            <div className="space-y-2.5 text-xs">
+              {learningPath.certifications.map((cert, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-[#F7F9FC] border border-[#EAF0F6] flex items-center justify-between">
+                  <div>
+                    <h5 className="font-bold text-[#172033]">{cert.name}</h5>
+                    <p className="text-[11px] text-[#718096]">{cert.level}</p>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#2F6FED] bg-[#EAF2FF] px-2 py-0.5 rounded-md border border-[#C8D5E5]">
+                    {cert.status}
+                  </span>
+                </div>
+              ))}
             </div>
-          </div>
+          </SurfaceCard>
+
         </div>
 
       </div>

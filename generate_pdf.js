@@ -1,0 +1,830 @@
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>InnoSkill AI - Strategic Deep Dive & Product Architecture</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    @page {
+      size: A4;
+      margin: 10mm 12mm;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1e293b;
+      background-color: #ffffff;
+      font-size: 10.5px;
+      line-height: 1.4;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    .page-break {
+      page-break-before: always;
+      margin-top: 10px;
+    }
+    
+    /* Cover / Header */
+    .header-box {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+      color: #ffffff;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border-left: 6px solid #10b981;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      font-size: 8.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.25);
+      color: #6ee7b7;
+      border: 1px solid rgba(110, 231, 183, 0.3);
+      margin-bottom: 6px;
+    }
+    
+    h1 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    
+    .subtitle {
+      font-size: 11px;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+    
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 9.5px;
+    }
+    
+    .meta-item strong {
+      color: #94a3b8;
+      display: block;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .meta-item span {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+    
+    /* Section Headings */
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding-bottom: 4px;
+      margin-top: 12px;
+      margin-bottom: 8px;
+      border-bottom: 2px solid #10b981;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .section-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      background: #d1fae5;
+      color: #065f46;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    
+    /* Bullet points */
+    ul.bullet-list {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 8px;
+    }
+    
+    ul.bullet-list li {
+      position: relative;
+      padding-left: 14px;
+      margin-bottom: 4px;
+      font-size: 10px;
+      color: #334155;
+    }
+    
+    ul.bullet-list li::before {
+      content: "•";
+      position: absolute;
+      left: 2px;
+      top: -1px;
+      color: #10b981;
+      font-weight: 900;
+      font-size: 12px;
+    }
+    
+    ul.bullet-list li strong {
+      color: #0f172a;
+      font-weight: 700;
+    }
+    
+    /* Card Grids */
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .card-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      border-top: 3px solid #10b981;
+    }
+    
+    .stat-card.emerald { border-top-color: #10b981; }
+    .stat-card.amber { border-top-color: #f59e0b; }
+    .stat-card.rose { border-top-color: #f43f5e; }
+    .stat-card.cyan { border-top-color: #06b6d4; }
+    
+    .stat-num {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    
+    .stat-label {
+      font-size: 8px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-top: 2px;
+    }
+    
+    .stat-desc {
+      font-size: 9px;
+      color: #475569;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    
+    /* Tables */
+    table.custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+      font-size: 9.5px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    
+    table.custom-table th {
+      background: #0f172a;
+      color: #f8fafc;
+      font-weight: 700;
+      text-align: left;
+      padding: 5px 8px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border: 1px solid #334155;
+    }
+    
+    table.custom-table td {
+      padding: 4px 7px;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      vertical-align: top;
+      line-height: 1.3;
+    }
+    
+    table.custom-table tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    
+    .pill {
+      display: inline-block;
+      padding: 1px 5px;
+      font-size: 8px;
+      font-weight: 700;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    
+    .pill-blue { background: #dbeafe; color: #1e40af; }
+    .pill-green { background: #d1fae5; color: #065f46; }
+    .pill-purple { background: #f3e8ff; color: #6b21a8; }
+    .pill-red { background: #ffe4e6; color: #9f1239; }
+    .pill-amber { background: #fef3c7; color: #92400e; }
+    
+    .feature-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #10b981;
+      border-radius: 5px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
+    }
+    
+    .feature-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .footer {
+      margin-top: 10px;
+      padding-top: 6px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 8px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: EXECUTIVE OVERVIEW, PROBLEM ANALYST, ROOT CAUSE, RESEARCH MODE -->
+  <div class="header-box">
+    <div class="badge">Strategic Blueprint & Architecture Dossier</div>
+    <h1>InnoSkill AI: Strategic Deep Dive & Product Blueprint</h1>
+    <div class="subtitle">Autonomous Inclusive Career Intelligence & Multimodal Accessible Hiring Platform</div>
+    
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Document Type</strong>
+        <span>End-to-End Blueprint</span>
+      </div>
+      <div class="meta-item">
+        <strong>Architecture</strong>
+        <span>Multi-Agent Orchestrator</span>
+      </div>
+      <div class="meta-item">
+        <strong>Target Demographic</strong>
+        <span>1.3B Global PwD Candidates</span>
+      </div>
+      <div class="meta-item">
+        <strong>Format</strong>
+        <span>Bulleted & Tabular Analysis</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. PROBLEM ANALYST -->
+  <div class="section-title"><span class="section-icon">1</span> Problem Analyst — Global Inclusive Hiring Breakdown</div>
+  <ul class="bullet-list">
+    <li><strong>Systemic Talent Exclusion:</strong> 1.3 Billion people globally live with disabilities, facing a catastrophic 70-80% unemployment rate in developing nations and 50-70% in developed nations.</li>
+    <li><strong>The "Accommodation Wall":</strong> Standard recruitment pipelines force candidates into rigid, visual-only, text-dense, and mouse-dependent flows that fail assistive technologies.</li>
+    <li><strong>Pre-Interview Algorithmic Drop-off:</strong> Legacy ATS software automatically discards candidates with non-linear career histories or accommodation requirements.</li>
+    <li><strong>Interview Assessment Discrimination:</strong> AI video hiring tools penalize non-standard speech, stuttering, neurodivergent eye-contact, or motor tremors as "low confidence."</li>
+    <li><strong>Information Asymmetry:</strong> Candidates fear disclosing accommodation needs; employers lack structured workflows to declare or verify workplace accessibility readiness.</li>
+  </ul>
+
+  <!-- 2. ROOT CAUSE ANALYST -->
+  <div class="section-title"><span class="section-icon">2</span> Root Cause Analyst — Why Legacy Architectures Fail</div>
+  <div class="card-grid-2">
+    <div class="feature-box">
+      <div class="feature-title"><span>🏗️ Single-Modality Architecture</span> <span class="pill pill-red">Root Cause 1</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>Legacy HR systems (Workday, Greenhouse, Taleo) built on 2005 desktop-first assumptions (screen + mouse + keyboard).</li>
+        <li>Accessibility is treated as a cosmetic overlay plugin rather than foundational DOM tokens.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>⚖️ Fear of Disclosure & Legal Ambiguity</span> <span class="pill pill-red">Root Cause 2</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>61% of candidates conceal disabilities fearing unconscious hiring bias and immediate resume filtering.</li>
+        <li>Recruiters fear discussing accommodations due to compliance litigation ambiguities under ADA Title I.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>🤖 AI Machine Learning Training Bias</span> <span class="pill pill-red">Root Cause 3</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>ATS scoring algorithms trained on historical corporate resumes systematically downrank non-linear resumes.</li>
+        <li>Standard Speech-to-Text models fail on dysarthric speech, accents, stuttering, and non-verbal modes.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>🏢 Post-Hiring Support Vacuum</span> <span class="pill pill-red">Root Cause 4</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>Hiring platforms terminate workflow at offer acceptance, abandoning candidate during onboarding.</li>
+        <li>No verified feedback loop exists for candidate communities to rate employer accessibility promises.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3. RESEARCH MODE & MARKET DATA -->
+  <div class="section-title"><span class="section-icon">3</span> Research Mode — Empirical Market Sizing & Legal Landscape</div>
+  <div class="card-grid-4">
+    <div class="stat-card">
+      <div class="stat-num">1.3 Billion</div>
+      <div class="stat-label">Global PwD Population</div>
+      <div class="stat-desc">16% of entire global population (WHO 2024 report).</div>
+    </div>
+    <div class="stat-card rose">
+      <div class="stat-num">75.4%</div>
+      <div class="stat-label">Underemployment</div>
+      <div class="stat-desc">Unemployed or underemployed working-age disabled talent.</div>
+    </div>
+    <div class="stat-card emerald">
+      <div class="stat-num">$1.9 Trillion</div>
+      <div class="stat-label">Annual Disposable Income</div>
+      <div class="stat-desc">PwD disposable income ($13T with network & family).</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-num">2025 Mandate</div>
+      <div class="stat-label">European Accessibility Act</div>
+      <div class="stat-desc">Strict legal enforcement for digital HR accessibility across EU.</div>
+    </div>
+  </div>
+
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 22%;">Market Segment</th>
+        <th style="width: 18%;">Market Size ($)</th>
+        <th style="width: 25%;">Target Demographic</th>
+        <th style="width: 35%;">Key Drivers & Catalysts</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>TAM (Total Addressable)</strong></td>
+        <td><span class="pill pill-blue">$48.2 Billion</span></td>
+        <td>Global Enterprise HRTech & ATS Recruitment Software</td>
+        <td>Universal digital transformation and compliance across 50,000+ global enterprises.</td>
+      </tr>
+      <tr>
+        <td><strong>SAM (Serviceable Addressable)</strong></td>
+        <td><span class="pill pill-purple">$12.6 Billion</span></td>
+        <td>DEI Hiring, Accessible Recruiting, Compliance Software</td>
+        <td>EAA 2025, Section 508, ADA Title II/III lawsuits, ESG compliance reporting mandates.</td>
+      </tr>
+      <tr>
+        <td><strong>SOM (Serviceable Obtainable)</strong></td>
+        <td><span class="pill pill-green">$1.8 Billion</span></td>
+        <td>Multimodal AI Career Platform for PwD & Inclusive Tech</td>
+        <td>Early enterprise adopters (Fortune 500, Tech, Government, Universities).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <!-- 4. PAIN POINT FINDER -->
+  <div class="section-title"><span class="section-icon">4</span> Pain Point Finder — Stakeholder Matrix</div>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 20%;">Stakeholder</th>
+        <th style="width: 40%;">Critical Pain Points</th>
+        <th style="width: 40%;">Impact & Consequence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Deaf & Hard-of-Hearing</strong></td>
+        <td>
+          • Inability to apply or interview using Native Sign Language (ASL/BSL).<br>
+          • Automated phone screening calls impossible without human interpreter.
+        </td>
+        <td>Immediate drop-off from 85% of online recruitment funnels.</td>
+      </tr>
+      <tr>
+        <td><strong>Blind & Low-Vision</strong></td>
+        <td>
+          • Inaccessible file uploaders, broken ARIA labels, unreadable PDF parsing.<br>
+          • Form timeout errors without screen reader announcements.
+        </td>
+        <td>Candidates abandon job applications within 3 minutes of entry.</td>
+      </tr>
+      <tr>
+        <td><strong>Motor & Speech Impaired</strong></td>
+        <td>
+          • Inability to navigate mouse-driven dropdowns or rapid timed tests.<br>
+          • Voice assistants reject dysarthric speech patterns or stuttering.
+        </td>
+        <td>Unfair disqualification on automated video interview evaluations.</td>
+      </tr>
+      <tr>
+        <td><strong>Corporate Recruiters</strong></td>
+        <td>
+          • Lack of structured tools to evaluate accessibility fit without legal risk.<br>
+          • Unaware of workplace accommodation equipment costs or options.
+        </td>
+        <td>Talent acquisition quotas fail; DEI targets remain unfulfilled.</td>
+      </tr>
+      <tr>
+        <td><strong>Enterprises & HR Leaders</strong></td>
+        <td>
+          • Massive legal liability under ADA Title I/III & EAA 2025.<br>
+          • No centralized tracking of employee workplace accommodation lifecycles.
+        </td>
+        <td>Costly multi-million dollar class-action accessibility lawsuits.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 5. REALITY CHECK -->
+  <div class="section-title"><span class="section-icon">5</span> Reality Check — Brutal Industry Truths vs. PR Myths</div>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 25%;">Corporate Myth / PR Narrative</th>
+        <th style="width: 35%;">Brutal Ground Reality</th>
+        <th style="width: 40%;">InnoSkill AI Structural Counter-Measure</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><em>"Our Careers website is 100% accessible via our widget plugin."</em></td>
+        <td>Overlays do not fix backend keyboard traps, broken forms, or timed tests.</td>
+        <td><strong>Native Multimodal Core:</strong> Built from DOM tokens up with Voice, NATO spelling, and Sign Language navigation.</td>
+      </tr>
+      <tr>
+        <td><em>"AI hiring tools remove human bias from the interview."</em></td>
+        <td>AI models penalize non-standard eye contact, speech patterns, and facial expressions.</td>
+        <td><strong>Bias Audit Agent:</strong> Strips physical/speech penalties; measures solely substantive STAR-framework skill demonstration.</td>
+      </tr>
+      <tr>
+        <td><em>"Accommodations are prohibitively expensive for employers."</em></td>
+        <td>58% of accommodations cost $0; the rest average &lt;$500 per employee.</td>
+        <td><strong>Automated Readiness Engine:</strong> Auto-generates low-cost accommodation recipes and tax-credit eligibility reports.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 6. PROBLEM DECOMPOSER -->
+  <div class="section-title"><span class="section-icon">6</span> Problem Decomposer — 9-Stage Career Lifecycle Friction</div>
+  <div class="card-grid-3">
+    <div class="feature-box">
+      <div class="feature-title"><span>1. Discovery & Profile</span> <span class="pill pill-blue">Phase 1-2</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li><strong>Friction:</strong> Manual resume formatting & inaccessible text inputs.</li>
+        <li><strong>Solution:</strong> Voice/Sign profile builder + OCR Resume Scanner.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>2. Upskilling & Matching</span> <span class="pill pill-purple">Phase 3-4</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li><strong>Friction:</strong> Opaque job descriptions with undisclosed physical hurdles.</li>
+        <li><strong>Solution:</strong> AI Skill Gap Roadmap + 5D Explainable Match.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>3. Interview & Growth</span> <span class="pill pill-green">Phase 5-9</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li><strong>Friction:</strong> High-anxiety interviews & zero post-hire support.</li>
+        <li><strong>Solution:</strong> Adaptive Mock Interview + Post-Hire Accommodation Hub.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 7. 10X MODE -->
+  <div class="section-title"><span class="section-icon">7</span> 10x Mode — Order-of-Magnitude Improvements</div>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 25%;">Workflow Dimension</th>
+        <th style="width: 35%;">Traditional Job Portals (1x)</th>
+        <th style="width: 40%;">InnoSkill AI Platform (10x Leap)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Application Input Speed</strong></td>
+        <td>45 minutes struggling with screen readers and forms.</td>
+        <td><strong>&lt; 3 minutes</strong> using voice dictation, NATO spelling, or sign presets.</td>
+      </tr>
+      <tr>
+        <td><strong>Match Transparency</strong></td>
+        <td>Opaque 0-100% black box number with zero rationale.</td>
+        <td><strong>5-Dimension Explainable Formula:</strong> Explicit skill, tenure, goals, & verified a11y.</td>
+      </tr>
+      <tr>
+        <td><strong>Interview Practice</strong></td>
+        <td>Generic video recording that penalizes speech defects.</td>
+        <td><strong>Adaptive AI Coach:</strong> STAR evaluation adjusting for speech & motor accommodations.</td>
+      </tr>
+      <tr>
+        <td><strong>Workplace Integration</strong></td>
+        <td>Zero assistance; candidate left alone to negotiate HR.</td>
+        <td><strong>Automated Accommodation Generator:</strong> 1-click legal & technical equipment kit.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <!-- 8. COMPLETE FEATURE LIST -->
+  <div class="section-title"><span class="section-icon">8</span> Complete Feature List & Architecture Breakdown</div>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 22%;">System Module</th>
+        <th style="width: 45%;">Core Capabilities & Feature Implementations</th>
+        <th style="width: 33%;">Technical Stack / Service</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Multimodal Interaction</strong></td>
+        <td>
+          • Web Speech API Recognition & Text-to-Speech synthesis.<br>
+          • NATO Phonetic Alphabet spelling mode for precise form entry.<br>
+          • MediaPipe Hand Landmark ASL gesture recognition.<br>
+          • High-contrast DOM override & keyboard navigation tokens.
+        </td>
+        <td>
+          <span class="pill pill-blue">VoiceAgentContext</span>
+          <span class="pill pill-purple">MediaPipe Hands</span>
+          <span class="pill pill-green">SpeechSynthesis</span>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Resume & Career AI</strong></td>
+        <td>
+          • PDF / DOCX semantic OCR parser with ATS scoring engine.<br>
+          • Line-by-line resume critique & formatting enhancement.<br>
+          • Skill Gap Analyzer with personalized upskilling roadmaps.<br>
+          • Conversational Career Assistant with speech-to-intent engine.
+        </td>
+        <td>
+          <span class="pill pill-blue">pdf-parse</span>
+          <span class="pill pill-purple">mammoth</span>
+          <span class="pill pill-green">CareerAgent</span>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>5D Matching Engine</strong></td>
+        <td>
+          • Formula: Score = 0.35(Skills) + 0.20(Exp) + 0.15(Goal) + 0.15(Work) + 0.15(A11y).<br>
+          • Source Confidence Labels (Verified, Employer-Reported, Inferred).<br>
+          • Physical Commute & Facility Accessibility Index (Elevators, Restrooms).<br>
+          • Responsible AI Bias Monitoring Audit layer.
+        </td>
+        <td>
+          <span class="pill pill-blue">5D Matching Algorithm</span>
+          <span class="pill pill-purple">BiasAuditAgent</span>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Interview AI Suite</strong></td>
+        <td>
+          • Adaptive STAR-method mock interview simulator.<br>
+          • Acoustic tolerance for dysarthria, stuttering, and pacing variations.<br>
+          • Real-time speech-to-text transcript & constructive feedback radar.<br>
+          • Anxiety-reducing customizable timer and break controls.
+        </td>
+        <td>
+          <span class="pill pill-blue">InterviewAgent</span>
+          <span class="pill pill-green">WebSpeech API</span>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Employer Portal</strong></td>
+        <td>
+          • Enterprise Accessibility Readiness Scorecard & Audit.<br>
+          • Verified accommodation listing creator (Remote, Screen Reader, Hardware).<br>
+          • Candidate accommodation matching pipeline.<br>
+          • Enterprise ATS Integrations (SAP SuccessFactors, Workday).
+        </td>
+        <td>
+          <span class="pill pill-blue">EmployerReadinessAgent</span>
+          <span class="pill pill-purple">SAP Connector</span>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Post-Hiring Hub</strong></td>
+        <td>
+          • 1-Click Workplace Accommodation Request Generator.<br>
+          • Ongoing internal career advancement and promotion tracking.<br>
+          • Candidate Accessibility Feedback Loop for community employer auditing.
+        </td>
+        <td>
+          <span class="pill pill-green">WorkplaceModule</span>
+          <span class="pill pill-blue">FeedbackRegistry</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 9. USP FEATURES & UNIQUENESS MATRIX -->
+  <div class="section-title"><span class="section-icon">9</span> USP Features & Uniqueness Matrix</div>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 28%;">Competitive Dimension</th>
+        <th style="width: 18%;">LinkedIn / Indeed</th>
+        <th style="width: 18%;">Workday / ATS</th>
+        <th style="width: 18%;">Niche Disability Boards</th>
+        <th style="width: 18%; background:#065f46;">InnoSkill AI</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Multimodal Interface</strong></td>
+        <td>❌ Text Only</td>
+        <td>❌ Text Only</td>
+        <td>⚠️ Basic Screen Reader</td>
+        <td><strong>✅ Voice, Sign & NATO</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Explainable A11y Matching</strong></td>
+        <td>❌ None</td>
+        <td>❌ None</td>
+        <td>⚠️ Static Filter Tags</td>
+        <td><strong>✅ 5D Formula + Badges</strong></td>
+      </tr>
+      <tr>
+        <td><strong>AI Sign Language Recognition</strong></td>
+        <td>❌ None</td>
+        <td>❌ None</td>
+        <td>❌ None</td>
+        <td><strong>✅ MediaPipe Hands Vision</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Bias-Free Adaptive Interview</strong></td>
+        <td>❌ Penalty Prone</td>
+        <td>❌ Penalty Prone</td>
+        <td>❌ None</td>
+        <td><strong>✅ STAR Speech Tolerance</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Post-Hiring Workplace Support</strong></td>
+        <td>❌ Terminates at Apply</td>
+        <td>❌ Internal Ticket Only</td>
+        <td>❌ None</td>
+        <td><strong>✅ 1-Click A11y Generator</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <!-- 10. GOD THINKING -->
+  <div class="section-title"><span class="section-icon">10</span> God Thinking — Macro Ecosystem & Systemic Transformation</div>
+  <ul class="bullet-list">
+    <li><strong>Global Open Accessibility Protocol (GOAP):</strong> Establish the world’s first open data standard for digital and physical workplace accommodations, embedding directly into enterprise HR architectures.</li>
+    <li><strong>Unlocking $1.9 Trillion in Latent Human Capital:</strong> Transitioning millions of qualified disabled professionals from government dependency into high-productivity enterprise contributors.</li>
+    <li><strong>Transforming Corporate ESG from PR to Operational Metric:</strong> Replacing superficial DEI marketing with mathematically verifiable, audit-ready accessibility indices.</li>
+    <li><strong>Autonomous Candidate Advocacy Agents:</strong> Empowering candidates with personal AI agents that proactively negotiate workplace accommodations and legal compliance directly with employer ATS.</li>
+  </ul>
+
+  <!-- 11. VIRAL FEATURES & GROWTH LOOPS -->
+  <div class="section-title"><span class="section-icon">11</span> Viral Features & Organic Growth Engines</div>
+  <div class="card-grid-2">
+    <div class="feature-box">
+      <div class="feature-title"><span>🌐 "My Accessibility Passport"</span> <span class="pill pill-purple">Viral Loop 1</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>Shareable, verified digital credential of candidate skills and validated accommodation needs.</li>
+        <li>Candidates share on LinkedIn/Twitter, triggering viral adoption among disability advocacy networks.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>🏆 Employer A11y Leaderboard</span> <span class="pill pill-green">Viral Loop 2</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>Public transparency index ranking Fortune 500 companies by verified accessibility readiness.</li>
+        <li>Companies compete for top-tier inclusive employer badges to attract tier-1 talent and ESG capital.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>🤟 "Sign-to-Apply" Video Demos</span> <span class="pill pill-blue">Viral Loop 3</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>Short-form demonstration videos showing real-time sign language camera control and job application.</li>
+        <li>High organic virality on TikTok, YouTube Shorts, and LinkedIn tech communities.</li>
+      </ul>
+    </div>
+    <div class="feature-box">
+      <div class="feature-title"><span>🎓 University DRC Ingestion</span> <span class="pill pill-amber">Viral Loop 4</span></div>
+      <ul class="bullet-list" style="margin-bottom:0;">
+        <li>Direct integration with University Disability Resource Centers (DRCs) onboarding graduating classes.</li>
+        <li>Creates a perpetual, high-quality, pre-verified annual talent pipeline.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 12. BLUE OCEAN STRATEGIST -->
+  <div class="section-title"><span class="section-icon">12</span> Blue Ocean Strategist — ERRC Grid & Value Innovation</div>
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th style="width: 25%; background: #991b1b;">ELIMINATE (Cost & Friction)</th>
+        <th style="width: 25%; background: #c2410c;">REDUCE (Risk & Overhead)</th>
+        <th style="width: 25%; background: #15803d;">RAISE (Standards & Quality)</th>
+        <th style="width: 25%; background: #1e40af;">CREATE (Blue Ocean Innovation)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          • Rigid visual-only forms.<br>
+          • Algorithmic speech penalties.<br>
+          • Mouse-only navigation barriers.<br>
+          • Opaque black-box rejections.
+        </td>
+        <td>
+          • Candidate disclosure fear.<br>
+          • Recruiter legal ambiguity.<br>
+          • Application time (&lt; 3 mins).<br>
+          • Accommodation research cost.
+        </td>
+        <td>
+          • Match score transparency.<br>
+          • Verified accessibility data.<br>
+          • Employer readiness standards.<br>
+          • Candidate advocacy dignity.
+        </td>
+        <td>
+          • Camera ASL recognition.<br>
+          • 5D explainable formula.<br>
+          • Post-hire accommodation hub.<br>
+          • Public A11y leaderboard.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <span>InnoSkill AI Strategic Blueprint & Architecture Specification</span>
+    <span>Generated: September 2026 • Confidential & Proprietary</span>
+    <span>Document Complete</span>
+  </div>
+
+</body>
+</html>`;
+
+const htmlPath = path.join(__dirname, 'INNOSKILL_AI_STRATEGIC_DEEP_DIVE.html');
+const pdfPath = path.join(__dirname, 'INNOSKILL_AI_STRATEGIC_DEEP_DIVE.pdf');
+const legacyPdfPath = path.join(__dirname, 'OPENABILITY_AI_STRATEGIC_DEEP_DIVE.pdf');
+
+fs.writeFileSync(htmlPath, htmlContent, 'utf-8');
+console.log('Wrote HTML to ' + htmlPath);
+
+const edgePath = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+try {
+  const cmd = '"' + edgePath + '" --headless --disable-gpu --run-all-compositor-stages-before-draw --print-to-pdf="' + pdfPath + '" "' + htmlPath + '"';
+  console.log('Running: ' + cmd);
+  execSync(cmd);
+  fs.copyFileSync(pdfPath, legacyPdfPath);
+  console.log('Successfully generated PDF at: ' + pdfPath);
+} catch (err) {
+  console.error('Error generating PDF:', err);
+}

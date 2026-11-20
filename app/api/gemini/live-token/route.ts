@@ -7,8 +7,9 @@ export async function POST() {
     if (!apiKey) {
       return NextResponse.json({
         success: false,
+        configured: false,
         error: 'GEMINI_API_KEY environment variable is missing on the server.'
-      }, { status: 500 });
+      }, { status: 503 });
     }
 
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString(); // 30-minute constrained token window
@@ -17,6 +18,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
+      configured: true,
       token: apiKey, // Managed server-side for constrained ephemeral WebSocket sessions
       expiresAt,
       wsUrl,

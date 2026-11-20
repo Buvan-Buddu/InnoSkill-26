@@ -385,33 +385,25 @@ export default function GeminiLiveTestPage() {
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '30px', fontFamily: 'system-ui, -apple-system, sans-serif', backgroundColor: '#0f172a', color: '#f8fafc', borderRadius: '16px', marginTop: '40px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.5)' }}>
-      <header style={{ borderBottom: '1px solid #334155', paddingBottom: '20px', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#38bdf8', margin: '0 0 8px 0' }}>
-          🎙 OpenAbility Phase 0 — Isolated Gemini Live Audio Test
+    <div className="max-w-4xl mx-auto p-6 sm:p-8 my-8 space-y-6">
+      <header className="border-b border-[#DCE5F0] pb-5 space-y-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#2F6FED] bg-[#EAF2FF] px-2.5 py-0.5 rounded-full border border-[#C8D5E5]">
+          Diagnostic Tool
+        </span>
+        <h1 className="text-2xl font-bold text-[#172033]">
+          Gemini Live Audio Diagnostics
         </h1>
-        <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>
+        <p className="text-xs text-[#718096]">
           Direct PCM Microphone Stream &rarr; Gemini Live Real-Time Session &rarr; Live Input Transcription Diagnostics.
         </p>
       </header>
 
       {/* Control Buttons */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+      <div className="flex flex-col sm:flex-row gap-4">
         <button
           onClick={startVoiceTest}
           disabled={connectionStatus === 'CONNECTED' || connectionStatus === 'CONNECTING'}
-          style={{
-            flex: 1,
-            padding: '16px',
-            borderRadius: '12px',
-            border: 'none',
-            backgroundColor: connectionStatus === 'CONNECTED' ? '#334155' : '#0284c7',
-            color: '#ffffff',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            cursor: connectionStatus === 'CONNECTED' ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease'
-          }}
+          className="button-primary flex-1 py-3 text-sm font-bold"
         >
           {connectionStatus === 'CONNECTING' ? '⏳ Connecting to Gemini Live...' : '▶ Start Voice Test'}
         </button>
@@ -419,86 +411,78 @@ export default function GeminiLiveTestPage() {
         <button
           onClick={stopVoiceTest}
           disabled={connectionStatus === 'DISCONNECTED'}
-          style={{
-            flex: 1,
-            padding: '16px',
-            borderRadius: '12px',
-            border: 'none',
-            backgroundColor: connectionStatus === 'DISCONNECTED' ? '#334155' : '#ef4444',
-            color: '#ffffff',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            cursor: connectionStatus === 'DISCONNECTED' ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease'
-          }}
+          className="button-danger flex-1 py-3 text-sm font-bold"
         >
           ⏹ Stop Voice Test
         </button>
       </div>
 
       {/* Status Badges */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ backgroundColor: '#1e293b', padding: '16px', borderRadius: '12px', border: '1px solid #334155' }}>
-          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>MICROPHONE STATUS</div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: micStatus === 'ACTIVE' ? '#4ade80' : '#f87171' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="surface-card p-4 border border-[#DCE5F0] bg-white space-y-1">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#718096]">Microphone Status</div>
+          <div className={`text-base font-bold ${micStatus === 'ACTIVE' ? 'text-[#16A36A]' : 'text-[#D64545]'}`}>
             {micStatus === 'ACTIVE' ? '🎙 ACTIVE' : micStatus}
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#1e293b', padding: '16px', borderRadius: '12px', border: '1px solid #334155' }}>
-          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>GEMINI LIVE SESSION</div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: connectionStatus === 'CONNECTED' ? '#38bdf8' : '#f87171' }}>
+        <div className="surface-card p-4 border border-[#DCE5F0] bg-white space-y-1">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#718096]">Gemini Live Session</div>
+          <div className={`text-base font-bold ${connectionStatus === 'CONNECTED' ? 'text-[#2F6FED]' : 'text-[#D64545]'}`}>
             {connectionStatus === 'CONNECTED' ? '⚡ CONNECTED' : connectionStatus}
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#1e293b', padding: '16px', borderRadius: '12px', border: '1px solid #334155' }}>
-          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>MODEL STATE</div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: geminiStatus === 'SPEAKING' ? '#c084fc' : '#4ade80' }}>
+        <div className="surface-card p-4 border border-[#DCE5F0] bg-white space-y-1">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#718096]">Model State</div>
+          <div className="text-base font-bold text-[#2F6FED]">
             {geminiStatus}
           </div>
         </div>
       </div>
 
       {/* Microphone Level & PCM Diagnostics */}
-      <div style={{ backgroundColor: '#1e293b', padding: '20px', borderRadius: '12px', border: '1px solid #334155', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <span style={{ fontWeight: 'bold', color: '#f8fafc' }}>Microphone Level Meter</span>
-          <span style={{ color: '#94a3b8', fontSize: '14px' }}>{micLevel}%</span>
+      <div className="surface-card p-6 border border-[#DCE5F0] bg-white space-y-4">
+        <div className="flex justify-between items-center text-xs">
+          <span className="font-bold text-[#172033]">Microphone Level Meter</span>
+          <span className="text-[#718096] font-semibold">{micLevel}%</span>
         </div>
-        <div style={{ width: '100%', height: '16px', backgroundColor: '#0f172a', borderRadius: '8px', overflow: 'hidden', marginBottom: '16px' }}>
-          <div style={{ width: `${micLevel}%`, height: '100%', backgroundColor: micLevel > 70 ? '#ef4444' : '#38bdf8', transition: 'width 0.1s ease' }} />
+        <div className="w-full h-3 bg-[#EEF4FB] rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-[#2F6FED] transition-all duration-100" 
+            style={{ width: `${micLevel}%` }} 
+          />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', fontSize: '13px', color: '#cbd5e1', paddingTop: '12px', borderTop: '1px solid #334155' }}>
-          <div>Chunks Sent: <strong style={{ color: '#38bdf8' }}>{chunksSent}</strong></div>
-          <div>Total Bytes: <strong style={{ color: '#38bdf8' }}>{totalBytesSent.toLocaleString()} B</strong></div>
-          <div>Chunk Size: <strong style={{ color: '#38bdf8' }}>{lastChunkSize} B</strong></div>
-          <div>Pipeline Status: <strong style={{ color: pipelineState.includes('VERIFIED') ? '#4ade80' : '#facc15' }}>{pipelineState}</strong></div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-[#4B5870] pt-3 border-t border-[#DCE5F0]">
+          <div>Chunks Sent: <strong className="text-[#172033]">{chunksSent}</strong></div>
+          <div>Total Bytes: <strong className="text-[#172033]">{totalBytesSent.toLocaleString()} B</strong></div>
+          <div>Chunk Size: <strong className="text-[#172033]">{lastChunkSize} B</strong></div>
+          <div>Pipeline Status: <strong className={pipelineState.includes('VERIFIED') ? 'text-[#16A36A]' : 'text-[#D98A00]'}>{pipelineState}</strong></div>
         </div>
       </div>
 
       {/* Live Input Transcription Box */}
-      <div style={{ backgroundColor: '#1e293b', padding: '20px', borderRadius: '12px', border: '1px solid #38bdf8', marginBottom: '24px' }}>
-        <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#38bdf8', marginBottom: '8px' }}>
-          [GEMINI INPUT TRANSCRIPTION DIAGNOSTIC]
+      <div className="surface-card p-6 border border-[#2F6FED]/40 bg-[#F4F8FF] space-y-2">
+        <div className="text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
+          Gemini Input Transcription Diagnostic
         </div>
-        <div style={{ fontSize: '20px', fontWeight: '600', color: inputTranscription ? '#ffffff' : '#64748b', minHeight: '40px' }}>
+        <div className="text-base font-semibold text-[#172033] min-h-[40px]">
           {inputTranscription || 'Speak "Yes", "No", "English", or "Hindi" into your microphone...'}
         </div>
       </div>
 
       {/* Output Status */}
-      <div style={{ backgroundColor: '#1e293b', padding: '16px', borderRadius: '12px', border: '1px solid #334155', marginBottom: '24px' }}>
-        <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>GEMINI AUDIO OUTPUT STATUS</div>
-        <div style={{ fontSize: '15px', color: '#cbd5e1' }}>{outputStatus}</div>
+      <div className="surface-card p-4 border border-[#DCE5F0] bg-white space-y-1">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-[#718096]">Gemini Audio Output Status</div>
+        <div className="text-xs text-[#4B5870]">{outputStatus}</div>
       </div>
 
       {/* Diagnostic Console Logs */}
-      <div style={{ backgroundColor: '#020617', padding: '16px', borderRadius: '12px', border: '1px solid #1e293b' }}>
-        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#94a3b8', marginBottom: '8px' }}>DIAGNOSTIC LOG CONSOLE</div>
-        <div style={{ maxHeight: '200px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '12px', color: '#a7f3d0' }}>
-          {logs.length === 0 ? <div style={{ color: '#475569' }}>Logs will appear here when testing...</div> : logs.map((log, index) => <div key={index}>{log}</div>)}
+      <div className="surface-card p-4 border border-[#DCE5F0] bg-[#F7F9FC] space-y-2">
+        <div className="text-xs font-bold uppercase tracking-wider text-[#718096]">Diagnostic Log Console</div>
+        <div className="max-h-48 overflow-y-auto font-mono text-xs text-[#172033] space-y-1 bg-white p-3 rounded-lg border border-[#DCE5F0]">
+          {logs.length === 0 ? <div className="text-[#718096]">Logs will appear here when testing...</div> : logs.map((log, index) => <div key={index}>{log}</div>)}
         </div>
       </div>
     </div>

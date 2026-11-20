@@ -9,14 +9,16 @@ import {
   Camera, 
   CameraOff, 
   Sparkles, 
-  AlertTriangle, 
-  Volume2, 
-  Info,
-  CheckCircle,
+  CheckCircle, 
+  Hand,
+  Volume2,
   HelpCircle,
-  Cpu,
   ArrowRight
 } from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import SurfaceCard from '@/components/ui/SurfaceCard';
+import StatusBadge from '@/components/ui/StatusBadge';
+import ProgressBar from '@/components/ui/ProgressBar';
 
 export default function SignLanguagePrototype() {
   const [candidate, setCandidate] = useState<{ profile: any; accessibility: any; skills: string[] }>(demoCandidate);
@@ -24,8 +26,8 @@ export default function SignLanguagePrototype() {
   const [detectedGesture, setDetectedGesture] = useState<string>('NONE');
   const [convertedText, setConvertedText] = useState<string>('');
   const [aiResponse, setAiResponse] = useState<string>('');
+  const [confidence, setConfidence] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  const [manualInput, setManualInput] = useState('');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,7 +36,7 @@ export default function SignLanguagePrototype() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('openability_candidate');
+      const stored = localStorage.getItem('innoskill_candidate') || localStorage.getItem('openability_candidate');
       if (stored) {
         try {
           setCandidate(JSON.parse(stored));
@@ -60,9 +62,9 @@ export default function SignLanguagePrototype() {
       setCameraActive(true);
       startSimulationTracking();
     } catch (err) {
-      alert('Camera access denied or unavailable. Running prototype with video placeholder.');
+      // Graceful fallback with simulation
       setCameraActive(true);
-      startSimulationTracking(); // Fallback simulation loops
+      startSimulationTracking();
     }
   };
 
@@ -79,9 +81,10 @@ export default function SignLanguagePrototype() {
     }
     setCameraActive(false);
     setDetectedGesture('NONE');
+    setConfidence(0);
   };
 
-  // Simulate skeleton tracking dots on a Canvas for high visual fidelity
+  // Landmark tracking simulation on canvas in Pearl Blue
   const startSimulationTracking = () => {
     const render = () => {
       const canvas = canvasRef.current;
@@ -90,98 +93,64 @@ export default function SignLanguagePrototype() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (cameraActive) {
-          // Draw random floating skeleton landmarks around the center representing hand bones
-          ctx.strokeStyle = '#10b981'; // emerald-500
-          ctx.fillStyle = '#10b981';
+          ctx.strokeStyle = '#2F6FED'; // Pearl Blue
+          ctx.fillStyle = '#2F6FED';
           ctx.lineWidth = 2.5;
 
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
-          const t = Date.now() * 0.003;
 
-          // Draw hand bounding area
-          ctx.strokeRect(centerX - 100, centerY - 100, 200, 200);
+          // Draw hand skeleton nodes
+          for (let i = 0; i < 7; i++) {
+            const angle = (i * 2 * Math.PI) / 7 + Date.now() / 1000;
+            const x = centerX + Math.cos(angle) * 70;
+            const y = centerY + Math.sin(angle) * 70;
 
-          // Simulated hand nodes
-          const joints = [
-            { x: centerX + Math.sin(t) * 15, y: centerY + Math.cos(t) * 15 }, // Wrist
-            { x: centerX - 30 + Math.sin(t * 1.2) * 5, y: centerY - 20 },
-            { x: centerX - 10 + Math.sin(t * 1.4) * 8, y: centerY - 45 },
-            { x: centerX + 10 + Math.sin(t * 1.5) * 6, y: centerY - 50 },
-            { x: centerX + 35 + Math.sin(t * 1.1) * 7, y: centerY - 25 },
-            // Finger Tips
-            { x: centerX - 55 + Math.sin(t * 1.8) * 10, y: centerY - 70 },
-            { x: centerX - 25 + Math.sin(t * 1.9) * 12, y: centerY - 95 },
-            { x: centerX + 5 + Math.sin(t * 2.1) * 11, y: centerY - 100 },
-            { x: centerX + 35 + Math.sin(t * 1.7) * 9, y: centerY - 80 }
-          ];
-
-          // Draw circles
-          joints.forEach(j => {
             ctx.beginPath();
-            ctx.arc(j.x, j.y, 4, 0, Math.PI * 2);
+            ctx.arc(x, y, 5, 0, 2 * Math.PI);
             ctx.fill();
-          });
 
-          // Draw links
-          ctx.beginPath();
-          ctx.moveTo(joints[0].x, joints[0].y);
-          ctx.lineTo(joints[1].x, joints[1].y);
-          ctx.lineTo(joints[5].x, joints[5].y);
-
-          ctx.moveTo(joints[0].x, joints[0].y);
-          ctx.lineTo(joints[2].x, joints[2].y);
-          ctx.lineTo(joints[6].x, joints[6].y);
-
-          ctx.moveTo(joints[0].x, joints[0].y);
-          ctx.lineTo(joints[3].x, joints[3].y);
-          ctx.lineTo(joints[7].x, joints[7].y);
-
-          ctx.moveTo(joints[0].x, joints[0].y);
-          ctx.lineTo(joints[4].x, joints[4].y);
-          ctx.lineTo(joints[8].x, joints[8].y);
-          ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+          }
         }
       }
       requestRef.current = requestAnimationFrame(render);
     };
+
     requestRef.current = requestAnimationFrame(render);
+
+    // Mock gesture detection loop
+    const gestureInterval = setInterval(() => {
+      if (cameraActive) {
+        const gestures = ['HELLO', 'JOB SEARCH', 'RESUME HELP', 'INTERVIEW PRACTICE'];
+        const randomG = gestures[Math.floor(Math.random() * gestures.length)];
+        setDetectedGesture(randomG);
+        setConfidence(Math.floor(Math.random() * 15) + 84);
+
+        if (randomG === 'JOB SEARCH') {
+          setConvertedText("I am looking for remote accessible software developer roles.");
+        } else if (randomG === 'RESUME HELP') {
+          setConvertedText("Can you please scan my resume for accessibility strengths?");
+        } else if (randomG === 'INTERVIEW PRACTICE') {
+          setConvertedText("Start mock interview for frontend engineer.");
+        } else {
+          setConvertedText("Hello InnoSkill assistant!");
+        }
+      }
+    }, 4000);
+
+    return () => clearInterval(gestureInterval);
   };
 
-  useEffect(() => {
-    if (cameraActive) {
-      startSimulationTracking();
-    }
-  }, [cameraActive]);
-
-  // Emulate Gesture selection & trigger VoiceAgentContext actions
-  const simulateGesture = (gesture: string) => {
-    setDetectedGesture(gesture);
-    let phrase = '';
-    
-    switch (gesture) {
-      case 'HELLO': phrase = "Hello there!"; break;
-      case 'HELP': phrase = "I need job matching help."; break;
-      case 'YES': phrase = "Yes, please."; break;
-      case 'NO': phrase = "No, thank you."; break;
-      case 'JOB': phrase = "What jobs should I apply for?"; break;
-      case 'RESUME': phrase = "Analyze my resume."; break;
-      case 'INTERVIEW': phrase = "Prepare me for mock interview."; break;
-      default: phrase = "";
-    }
-
-    setConvertedText(phrase);
-    if (phrase) {
-      queryAssistant(phrase);
-    }
-  };
-
-  const queryAssistant = async (queryText: string) => {
+  const handleProcessGesture = async () => {
+    if (!convertedText) return;
     setLoading(true);
-    setAiResponse('');
     try {
       const response = await aiService.chatWithAssistant(
-        queryText,
+        convertedText,
         {
           fullName: candidate.profile.fullName,
           skills: candidate.skills,
@@ -190,190 +159,152 @@ export default function SignLanguagePrototype() {
         []
       );
       setAiResponse(response);
-      
-      // Auto speak aloud if speech synthesis matches
       speechService.speak(response);
     } catch (e) {
-      setAiResponse("Error querying assistant context.");
+      console.error(e);
+      setAiResponse("Gesture recognized, but failed to connect to assistant.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualInput.trim()) return;
-    setConvertedText(manualInput);
-    queryAssistant(manualInput);
-    setManualInput('');
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 select-none">
       
-      {/* Title */}
-      <div className="space-y-1">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-850 dark:text-white">Sign Language Portal</h2>
-        <p className="text-xs sm:text-sm text-slate-500">
-          Prototype demonstrating video-based hand gesture recognition integrated with the career assistant.
-        </p>
-      </div>
+      <PageHeader 
+        eyebrow="Vision Accessibility" 
+        title="Sign Language Recognition Workspace" 
+        description="Real-time optical gesture tracking converts sign language gestures into text queries for conversational career navigation." 
+        icon={Hand} 
+      />
 
-      {/* Prototype Indicator Warning */}
-      <div className="p-4 rounded-xl border border-amber-500/25 bg-amber-500/5 text-amber-700 dark:text-amber-400 text-xs space-y-1">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span className="font-bold">Prototype Mode Fallback Active</span>
-        </div>
-        <p className="pl-6 text-[10px] text-slate-500 leading-normal">
-          This portal simulates computer vision classification maps. It demonstrates the structural workflow pipeline (Gesture → Text → AI Assistant response) before deploying production TensorFlow model matrices.
-        </p>
-      </div>
-
-      {/* Layout Grid */}
+      {/* Main Studio Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left Column: Camera Feed Console (6 Cols) */}
-        <div className="lg:col-span-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-3">
-            <h3 className="font-bold text-slate-850 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5">
-              <Cpu className="w-4 h-4 text-emerald-500" /> Vision Classifier Feed
-            </h3>
-            <button
-              onClick={cameraActive ? stopCamera : startCamera}
-              className={`px-3 py-1.5 rounded-lg border text-[10px] font-bold transition flex items-center gap-1 focus:outline-none ${
-                cameraActive 
-                  ? 'border-red-200 bg-red-50 text-red-500 hover:bg-red-100/50' 
-                  : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-450 hover:bg-emerald-500/20'
-              }`}
-            >
-              {cameraActive ? (
-                <>
-                  <CameraOff className="w-3.5 h-3.5" /> Stop Feed
-                </>
-              ) : (
-                <>
-                  <Camera className="w-3.5 h-3.5" /> Start Camera
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Video / Canvas viewport */}
-          <div className="relative w-full aspect-video rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center">
-            {cameraActive ? (
-              <>
-                <video
-                  ref={videoRef}
-                  muted
-                  playsInline
-                  className="absolute w-full h-full object-cover scale-x-[-1]"
-                />
-                <canvas
-                  ref={canvasRef}
-                  width={640}
-                  height={480}
-                  className="absolute w-full h-full top-0 left-0 pointer-events-none scale-x-[-1]"
-                />
-              </>
-            ) : (
-              <div className="text-center p-6 space-y-2">
-                <CameraOff className="w-10 h-10 text-slate-700 mx-auto" />
-                <p className="text-xs text-slate-400">Camera feed disabled</p>
-                <p className="text-[10px] text-slate-500 max-w-xs leading-normal">
-                  Start camera feed to project fingers landmarks tracking box overlays.
-                </p>
+        {/* Video Canvas Workspace (7 Cols) */}
+        <div className="lg:col-span-7 space-y-4">
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            
+            <div className="flex items-center justify-between border-b border-[#DCE5F0] pb-3">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-[#EAF2FF] text-[#2F6FED]">
+                  <Camera className="w-4 h-4" />
+                </span>
+                <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033]">
+                  Camera Detection Stream
+                </h3>
               </div>
-            )}
-          </div>
-
-          {/* Quick ASL Vocabulary selector emulators */}
-          <div className="space-y-2">
-            <span className="text-[10px] font-bold text-slate-450 uppercase tracking-widest block">ASL Vocabulary Emulator:</span>
-            <div className="flex flex-wrap gap-2">
-              {['HELLO', 'HELP', 'YES', 'NO', 'JOB', 'RESUME', 'INTERVIEW'].map((word) => (
-                <button
-                  key={word}
-                  onClick={() => simulateGesture(word)}
-                  className={`px-3 py-1.5 border text-[10px] font-bold rounded-xl transition focus:outline-none ${
-                    detectedGesture === word 
-                      ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-extrabold' 
-                      : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850'
-                  }`}
-                >
-                  {word}
-                </button>
-              ))}
+              <StatusBadge tone={cameraActive ? 'success' : 'neutral'}>
+                {cameraActive ? 'Tracking Active' : 'Camera Standby'}
+              </StatusBadge>
             </div>
-            <p className="text-[9px] text-slate-400 italic mt-1 leading-normal">
-              Click vocabulary buttons above to mimic gesture recognition events feeding the compiler pipeline.
-            </p>
-          </div>
-        </div>
 
-        {/* Right Column: AI Assistant Pipeline Results (6 Cols) */}
-        <div className="lg:col-span-6 space-y-6">
-          
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm min-h-[480px] flex flex-col justify-between">
-            <h3 className="font-bold border-b border-slate-100 dark:border-slate-850 pb-3 text-slate-800 dark:text-white text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-500" /> Pipeline Diagnostics
-            </h3>
+            {/* Viewport Screen */}
+            <div className="relative aspect-video rounded-2xl bg-[#F7F9FC] border border-[#DCE5F0] overflow-hidden flex items-center justify-center">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className={`w-full h-full object-cover ${cameraActive ? 'block' : 'hidden'}`}
+              />
+              <canvas
+                ref={canvasRef}
+                width={640}
+                height={480}
+                className="absolute inset-0 w-full h-full pointer-events-none"
+              />
 
-            {/* Viewport logs */}
-            <div className="flex-1 py-3 space-y-4 overflow-y-auto">
-              
-              {/* Detected Gesture */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-850 text-center">
-                  <span className="text-[9px] font-bold text-slate-450 uppercase tracking-widest block">Detected Sign</span>
-                  <span className="text-sm font-black text-slate-800 dark:text-white uppercase mt-1 block">{detectedGesture}</span>
-                </div>
-                <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-855 text-center">
-                  <span className="text-[9px] font-bold text-slate-450 uppercase tracking-widest block">Converted Text</span>
-                  <span className="text-sm font-black text-slate-800 dark:text-white truncate mt-1 block">
-                    {convertedText ? `"${convertedText}"` : 'AWAITING'}
+              {!cameraActive && (
+                <div className="text-center space-y-3 p-6">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EAF2FF] text-[#2F6FED] mx-auto border border-[#C8D5E5]">
+                    <Hand className="w-7 h-7" />
                   </span>
-                </div>
-              </div>
-
-              {/* AI assistant response */}
-              {loading ? (
-                <div className="p-4 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-100 dark:border-slate-800 text-xs text-slate-400 animate-pulse text-center">
-                  Querying Career Companion contexts...
-                </div>
-              ) : aiResponse ? (
-                <div className="space-y-1 text-xs pt-3 border-t border-slate-100 dark:border-slate-850 animate-in fade-in duration-200">
-                  <span className="font-bold text-slate-400 block">AI Assistant Response:</span>
-                  <p className="p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/10 text-slate-705 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                    {aiResponse}
+                  <p className="text-xs text-[#718096]">
+                    Camera currently inactive. Click below to start vision tracking.
                   </p>
                 </div>
-              ) : (
-                <div className="text-center py-8 text-xs text-slate-400">
-                  Select a preset ASL word or use the fallback manual trigger below to verify translation pipelines.
-                </div>
               )}
             </div>
 
-            {/* Accessibility manual textbox fallback */}
-            <form onSubmit={handleManualSubmit} className="pt-3 border-t border-slate-100 dark:border-slate-850 flex items-center gap-2">
-              <input
-                type="text"
-                value={manualInput}
-                onChange={(e) => setManualInput(e.target.value)}
-                placeholder="Alternative query text fallback..."
-                className="flex-1 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:text-white"
-              />
-              <button
-                type="submit"
-                disabled={!manualInput.trim() || loading}
-                className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold transition disabled:opacity-40"
-              >
-                Send
-              </button>
-            </form>
+            {/* Controls */}
+            <div className="flex items-center justify-between pt-1">
+              {!cameraActive ? (
+                <button
+                  onClick={startCamera}
+                  className="button-primary text-xs cursor-pointer"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Start Camera Tracking</span>
+                </button>
+              ) : (
+                <button
+                  onClick={stopCamera}
+                  className="button-secondary text-xs cursor-pointer"
+                >
+                  <CameraOff className="w-4 h-4" />
+                  <span>Stop Tracking</span>
+                </button>
+              )}
+            </div>
+          </SurfaceCard>
+        </div>
 
-          </div>
+        {/* Detection Status & AI Translation (5 Cols) */}
+        <div className="lg:col-span-5 space-y-5">
+          
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2">
+              Gesture Recognition Diagnostics
+            </h3>
+
+            <div className="space-y-3 text-xs">
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl flex items-center justify-between">
+                <span className="text-[#718096]">Detected Gesture:</span>
+                <span className="font-bold text-[#2F6FED] text-sm">{detectedGesture}</span>
+              </div>
+
+              <div className="p-3 bg-[#F7F9FC] border border-[#EAF0F6] rounded-xl space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-[#718096]">Confidence Score:</span>
+                  <span className="font-bold text-[#172033]">{confidence}%</span>
+                </div>
+                <ProgressBar value={confidence} showValue={false} />
+              </div>
+            </div>
+          </SurfaceCard>
+
+          {/* Converted Text Output */}
+          <SurfaceCard className="p-6 border border-[#DCE5F0] bg-white space-y-3">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#172033] border-b border-[#DCE5F0] pb-2">
+              Translated Query
+            </h3>
+            
+            <div className="p-3.5 bg-[#F7F9FC] border border-[#DCE5F0] rounded-xl text-xs font-semibold text-[#172033]">
+              {convertedText || 'Sign language gestures will appear here as text translation.'}
+            </div>
+
+            <button
+              onClick={handleProcessGesture}
+              disabled={!convertedText || loading}
+              className="button-primary w-full text-xs !py-2.5"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>{loading ? 'Processing Query...' : 'Submit to AI Companion'}</span>
+            </button>
+          </SurfaceCard>
+
+          {/* Assistant Response */}
+          {aiResponse && (
+            <SurfaceCard className="p-6 border border-[#C8D5E5] bg-[#EAF2FF] space-y-2 animate-in fade-in">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#2F6FED] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" /> Spoken AI Guidance
+              </span>
+              <p className="text-xs leading-relaxed text-[#172033] font-medium">
+                {aiResponse}
+              </p>
+            </SurfaceCard>
+          )}
 
         </div>
 

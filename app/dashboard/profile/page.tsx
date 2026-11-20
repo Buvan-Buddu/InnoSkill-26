@@ -1,8 +1,22 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { emptyCandidate, demoCandidate } from '@/database/seed-data';
-import { Eye, HelpCircle, Save, Smile, HeartHandshake } from 'lucide-react';
+import { emptyCandidate } from '@/database/seed-data';
+import { 
+  User, 
+  Save, 
+  Briefcase, 
+  SlidersHorizontal, 
+  Eye, 
+  MessageSquare, 
+  Plus, 
+  Trash2, 
+  CheckCircle2,
+  ShieldCheck,
+  Check
+} from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import ProgressBar from '@/components/ui/ProgressBar';
 
 export default function CandidateProfilePage() {
   const [profile, setProfile] = useState(emptyCandidate.profile);
@@ -14,7 +28,7 @@ export default function CandidateProfilePage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('openability_candidate');
+      const stored = localStorage.getItem('innoskill_candidate') || localStorage.getItem('openability_candidate');
       if (stored) {
         try {
           const data = JSON.parse(stored);
@@ -97,7 +111,7 @@ export default function CandidateProfilePage() {
 
   const addAcc = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newAccommodation.trim() && !acc.accommodations.includes(newAccommodation.trim())) {
+    if (newAccommodation.trim()) {
       setAcc(prev => ({ ...prev, accommodations: [...prev.accommodations, newAccommodation.trim()] }));
       setNewAccommodation('');
     }
@@ -107,153 +121,216 @@ export default function CandidateProfilePage() {
     setAcc(prev => ({ ...prev, accommodations: prev.accommodations.filter(a => a !== accToRemove) }));
   };
 
-  const saveProfile = (e: React.FormEvent) => {
+  const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const candidateData = {
+      profile,
+      accessibility: acc,
+      skills
+    };
+
     if (typeof window !== 'undefined') {
-      const candidateData = {
-        profile,
-        accessibility: acc,
-        skills
-      };
+      localStorage.setItem('innoskill_candidate', JSON.stringify(candidateData));
       localStorage.setItem('openability_candidate', JSON.stringify(candidateData));
+    }
+
+    try {
+      await Promise.all([
+        fetch('/api/user/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(profile)
+        }),
+        fetch('/api/user/accessibility', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(acc)
+        })
+      ]);
+    } catch (e) {
+      console.error(e);
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
 
+  const initials = profile.fullName
+    ? profile.fullName.split(' ').map((n: string) => n[0]).filter(Boolean).join('').slice(0, 2).toUpperCase()
+    : 'CA';
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 select-none">
       
-      {/* Title & SAP Integration Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1.5">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Accessibility & Profile settings</h2>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-            Modify your communication preference, workspace configuration, and required assistive accommodations.
-          </p>
+      <PageHeader 
+        eyebrow="Candidate Details" 
+        title="Profile & Accessibility Settings" 
+        description="Manage your professional summary, verified skills, communication modes, and workplace accommodation requests." 
+        icon={User} 
+      />
+
+      {/* Top Profile Summary Card */}
+      <section className="surface-card p-6 sm:p-7 border border-[#DCE5F0] bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EAF2FF] text-xl font-black uppercase text-[#2F6FED] border border-[#C8D5E5]">
+            {initials}
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-[#172033]">{profile.fullName || 'Candidate'}</h2>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#EBFDF5] text-[#16A36A] border border-[#B7F4D8]">
+                Verified
+              </span>
+            </div>
+            <p className="text-xs text-[#4B5870]">
+              {profile.targetRoles?.[0] || 'Software Professional'} • {profile.education || 'Higher Education'}
+            </p>
+            <p className="text-xs text-[#718096]">
+              {profile.phone || 'Phone not set'} • {profile.experienceYears || 0} years experience
+            </p>
+          </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs shrink-0 self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="text-[11px] font-extrabold text-cyan-300">SAP SuccessFactors Ready</span>
+        {/* Profile Strength */}
+        <div className="w-full sm:w-64 bg-[#F7F9FC] border border-[#EAF0F6] rounded-2xl p-4 space-y-2 shrink-0">
+          <div className="flex items-center justify-between text-xs font-bold">
+            <span className="text-[#4B5870]">Profile Strength</span>
+            <span className="text-[#2F6FED]">85%</span>
+          </div>
+          <ProgressBar value={85} showValue={false} />
+          <span className="text-[10px] text-[#718096] block">High completeness for job matching</span>
         </div>
-      </div>
+      </section>
 
       {saved && (
-        <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold text-xs animate-in fade-in slide-in-from-top-2">
-          🎉 Accessibility profile saved successfully! Matches, SAP integration, and AI outputs have updated.
+        <div className="p-4 rounded-2xl border border-[#B7F4D8] bg-[#EBFDF5] text-[#16A36A] font-bold text-xs flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>Profile and accommodation preferences saved successfully!</span>
         </div>
       )}
 
       {/* Main Grid */}
-      <form onSubmit={saveProfile} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form onSubmit={saveProfile} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left 2 Cols: Profile Form & Target Roles */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Left Column: Personal & Professional Information (7 Cols) */}
+        <div className="lg:col-span-7 space-y-6">
           
-          {/* General Profile Info */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="font-black border-b border-slate-100 dark:border-slate-800 pb-3 text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
-              <Smile className="w-5 h-5 text-emerald-400" /> Professional Details
-            </h3>
+          {/* Section 1: Personal & Professional */}
+          <div className="surface-card p-6 space-y-4 border border-[#DCE5F0] bg-white">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-[#DCE5F0]">
+              <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+                <User className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="font-bold text-sm text-[#172033]">Personal & Professional Details</h3>
+                <p className="text-[11px] text-[#718096]">Identity information shared with potential employers.</p>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Full Name</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#172033]">Full Name</label>
                 <input
                   type="text"
                   name="fullName"
                   value={profile.fullName}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
+                  className="input-pearl"
                   required
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Phone Contact</label>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#172033]">Phone Contact</label>
                 <input
                   type="text"
                   name="phone"
                   value={profile.phone || ''}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
+                  className="input-pearl"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Experience Years</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#172033]">Experience (Years)</label>
                 <input
                   type="number"
                   name="experienceYears"
                   value={profile.experienceYears || 0}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
+                  className="input-pearl"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Education Details</label>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#172033]">Education Institution / Degree</label>
                 <input
                   type="text"
                   name="education"
                   value={profile.education || ''}
                   onChange={handleProfileChange}
-                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
+                  className="input-pearl"
                 />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Professional Bio</label>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-[#172033]">Executive Summary / Bio</label>
               <textarea
                 name="bio"
                 value={profile.bio || ''}
                 onChange={handleProfileChange}
-                rows={4}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
+                rows={3}
+                className="input-pearl !h-auto"
+                placeholder="Brief introduction of your career strengths and goals..."
               />
             </div>
           </div>
 
-          {/* Target Roles */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4 shadow-sm">
-            <h3 className="font-black border-b border-slate-100 dark:border-slate-800 pb-3 text-slate-900 dark:text-white text-sm sm:text-base">
-              Target Career Roles
-            </h3>
+          {/* Section 2: Career Goals & Target Roles */}
+          <div className="surface-card p-6 space-y-4 border border-[#DCE5F0] bg-white">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-[#DCE5F0]">
+              <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+                <Briefcase className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="font-bold text-sm text-[#172033]">Target Career Roles</h3>
+                <p className="text-[11px] text-[#718096]">Roles used to train ability matching and recommendations.</p>
+              </div>
+            </div>
 
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="e.g. Frontend Lead, UI Dev"
+                placeholder="e.g. Accessibility UI Specialist, Cloud Architect"
                 value={targetRoleInput}
                 onChange={(e) => setTargetRoleInput(e.target.value)}
-                className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white placeholder-slate-400"
+                className="input-pearl flex-1"
               />
               <button
                 type="button"
                 onClick={addRole}
-                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-black transition"
+                className="button-primary !px-4"
               >
-                Add Role
+                <Plus className="w-4 h-4" />
+                <span>Add</span>
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-2">
-              {profile.targetRoles.map((role) => (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {profile.targetRoles.map((role: string, idx: number) => (
                 <span
-                  key={role}
-                  className="flex items-center gap-1.5 text-xs font-extrabold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800"
+                  key={idx}
+                  className="inline-flex items-center gap-2 bg-[#EAF2FF] border border-[#C8D5E5] text-[#2F6FED] px-3 py-1.5 rounded-xl text-xs font-semibold"
                 >
-                  {role}
+                  <span>{role}</span>
                   <button
                     type="button"
                     onClick={() => removeRole(role)}
-                    className="text-slate-400 hover:text-red-500 transition font-black ml-1 text-sm"
+                    className="text-[#718096] hover:text-[#D64545] transition cursor-pointer"
                   >
-                    ×
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </span>
               ))}
@@ -262,124 +339,147 @@ export default function CandidateProfilePage() {
 
         </div>
 
-        {/* Right 1 Col: Accessibility Configurations */}
-        <div className="space-y-6">
+        {/* Right Column: Preferences & Accommodations (5 Cols) */}
+        <div className="lg:col-span-5 space-y-6">
           
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="font-black border-b border-slate-100 dark:border-slate-800 pb-3 text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
-              <HeartHandshake className="w-5 h-5 text-emerald-400" /> Accommodations
-            </h3>
-
-            {/* Comm preference */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Communication Mode Preference</label>
-              <select
-                name="communicationPreference"
-                value={acc.communicationPreference}
-                onChange={handleAccChange}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
-              >
-                <option value="TEXT">Text only (Async messages / transcripts)</option>
-                <option value="VOICE">Voice only (TTS synthesis / screen reading)</option>
-                <option value="SIGN_LANGUAGE">Sign Language (Video / camera interface)</option>
-              </select>
-            </div>
-
-            {/* Work setting */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Work Setting Preference</label>
-              <select
-                name="workPreference"
-                value={acc.workPreference}
-                onChange={handleAccChange}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
-              >
-                <option value="REMOTE">Fully Remote</option>
-                <option value="HYBRID">Hybrid Model</option>
-                <option value="OFFICE">Office Only</option>
-              </select>
-            </div>
-
-            {/* Checklist */}
-            <div className="space-y-3.5 pt-2">
-              <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200 block border-b border-slate-100 dark:border-slate-800 pb-1">Sensory & Tech Accommodations</span>
-              
-              <div className="space-y-2.5">
-                {[
-                  { name: 'screenReaderRequired', label: 'Require Screen Reader Layouts' },
-                  { name: 'highContrastRequired', label: 'Require High-Contrast Mode' },
-                  { name: 'largeTextRequired', label: 'Require Large Font Scaling' },
-                  { name: 'captionsRequired', label: 'Require Captions for Video Call' },
-                  { name: 'textCommunicationOnly', label: 'Prefer Text-Only Communication' },
-                  { name: 'accessiblePhysicalSpace', label: 'Require Wheelchair Physical Spaces' },
-                  { name: 'flexibleHours', label: 'Require Flexible Working Hours' },
-                  { name: 'keyboardNavigationOnly', label: 'Require Keyboard-Only Navigation' },
-                ].map((item) => (
-                  <label key={item.name} className="flex items-center gap-3 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      name={item.name}
-                      checked={!!(acc as any)[item.name]}
-                      onChange={handleAccChange}
-                      className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-emerald-500 focus:ring-emerald-400 focus:outline-none shrink-0"
-                    />
-                    <span>{item.label}</span>
-                  </label>
-                ))}
+          {/* Section 3: Communication & Work Preferences */}
+          <div className="surface-card p-6 space-y-4 border border-[#DCE5F0] bg-white">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-[#DCE5F0]">
+              <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+                <SlidersHorizontal className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="font-bold text-sm text-[#172033]">Communication & Work Style</h3>
+                <p className="text-[11px] text-[#718096]">Your preferred operational models.</p>
               </div>
             </div>
 
-            {/* Custom accommodations text */}
-            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-              <label className="text-xs font-extrabold text-slate-800 dark:text-slate-200 block">Custom Required Accommodations</label>
-              
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#172033]">Communication Mode</label>
+                <select
+                  name="communicationPreference"
+                  value={acc.communicationPreference}
+                  onChange={handleAccChange}
+                  className="input-pearl"
+                >
+                  <option value="TEXT">Text & Asynchronous Chat</option>
+                  <option value="VOICE">Spoken Voice (Audio)</option>
+                  <option value="SIGN_LANGUAGE">Sign Language (Visual)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[#172033]">Work Arrangement</label>
+                <select
+                  name="workPreference"
+                  value={acc.workPreference}
+                  onChange={handleAccChange}
+                  className="input-pearl"
+                >
+                  <option value="REMOTE">Fully Remote</option>
+                  <option value="HYBRID">Hybrid (Remote + Office)</option>
+                  <option value="ONSITE">Onsite Office</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Specific Workplace Accommodations */}
+          <div className="surface-card p-6 space-y-4 border border-[#DCE5F0] bg-white">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-[#DCE5F0]">
+              <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+                <Eye className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="font-bold text-sm text-[#172033]">Accommodations & Support</h3>
+                <p className="text-[11px] text-[#718096]">Synced to SAP SuccessFactors requisitions.</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {[
+                { name: 'screenReaderRequired', label: 'Screen reader required' },
+                { name: 'highContrastRequired', label: 'High contrast layout mode' },
+                { name: 'largeTextRequired', label: 'Large text typography scaling' },
+                { name: 'captionsRequired', label: 'Closed captions for video calls' },
+                { name: 'textCommunicationOnly', label: 'Text-only communication preference' },
+                { name: 'accessiblePhysicalSpace', label: 'Wheelchair / physical facility access' },
+                { name: 'flexibleHours', label: 'Flexible working hours' },
+                { name: 'keyboardNavigationOnly', label: 'Keyboard-only navigation support' },
+              ].map((item) => (
+                <label
+                  key={item.name}
+                  className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-[#F7F9FC] transition cursor-pointer text-xs font-semibold text-[#172033]"
+                >
+                  <input
+                    type="checkbox"
+                    name={item.name}
+                    checked={Boolean((acc as any)[item.name])}
+                    onChange={handleAccChange}
+                    className="h-4 w-4 rounded-md border-[#DCE5F0] text-[#2F6FED] focus:ring-[#2F6FED]"
+                  />
+                  <span>{item.label}</span>
+                </label>
+              ))}
+            </div>
+
+            {/* Custom Accommodations List */}
+            <div className="pt-2 border-t border-[#DCE5F0] space-y-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#718096] block">
+                Additional Accommodation Items
+              </span>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="e.g. Ergonomic desk setup"
+                  placeholder="e.g. Ergonomic keyboard, NVDA license"
                   value={newAccommodation}
                   onChange={(e) => setNewAccommodation(e.target.value)}
-                  className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-400 focus:outline-none text-slate-900 dark:text-white"
+                  className="input-pearl flex-1 text-xs"
                 />
                 <button
                   type="button"
                   onClick={addAcc}
-                  className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-black transition"
+                  className="button-secondary !px-3 text-xs"
                 >
-                  Add
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 pt-1.5">
-                {acc.accommodations.map((item) => (
-                  <span
-                    key={item}
-                    className="flex items-center gap-1.5 text-[11px] font-extrabold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800"
+              <div className="space-y-1.5">
+                {acc.accommodations.map((a: string, idx: number) => (
+                  <div 
+                    key={idx} 
+                    className="flex items-center justify-between p-2 rounded-lg bg-[#F7F9FC] border border-[#EAF0F6] text-xs font-medium text-[#4B5870]"
                   >
-                    {item}
+                    <span>{a}</span>
                     <button
                       type="button"
-                      onClick={() => removeAcc(item)}
-                      className="text-slate-400 hover:text-red-500 font-black ml-1"
+                      onClick={() => removeAcc(a)}
+                      className="text-[#718096] hover:text-[#D64545] cursor-pointer"
                     >
-                      ×
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                  </span>
+                  </div>
                 ))}
               </div>
             </div>
 
           </div>
 
+          {/* Save Action */}
           <button
             type="submit"
-            className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-lg shadow-emerald-500/20 text-xs sm:text-sm cursor-pointer"
+            className="button-primary w-full py-3.5 text-sm cursor-pointer shadow-md"
           >
-            <Save className="w-4.5 h-4.5" /> Save Accessibility Settings
+            <Save className="w-4 h-4" />
+            <span>Save Profile & Accommodations</span>
           </button>
+
         </div>
 
       </form>
+
     </div>
   );
 }

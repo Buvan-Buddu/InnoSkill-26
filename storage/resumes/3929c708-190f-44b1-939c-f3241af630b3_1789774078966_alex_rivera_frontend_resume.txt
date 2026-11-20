@@ -1,0 +1,32 @@
+Alex Rivera
+Email: alex.rivera@dev.io | Phone: (555) 234-5678 | GitHub: github.com/arivera
+
+PROFESSIONAL SUMMARY
+Accessible UI Engineer with 4 years of experience specializing in React, TypeScript, and WCAG 2.1 AA compliance. Built keyboard-navigable applications for over 500k active users.
+
+TECHNICAL SKILLS
+- Programming Languages: TypeScript, JavaScript, HTML5, CSS3, SQL
+- Frameworks & Libraries: React, Next.js, Tailwind CSS, Redux Toolkit
+- Tools & Cloud: Git, Docker, Jest, Vite, ARIA practices
+
+WORK EXPERIENCE
+Senior Frontend Engineer | AccessiTech Inc. (2023 - Present)
+- Refactored core web portal to conform strictly to WCAG 2.2 AA accessibility benchmarks.
+- Increased accessibility audit score from 62% to 98% across 40+ user-facing screens.
+- Improved keyboard focus trapping and ARIA live region notifications for screen readers.
+
+Web Developer | CodeCraft Studio (2021 - 2023)
+- Developed responsive React dashboards for healthcare and education clients.
+- Reduced layout shifts (CLS) by 25% using CSS Grid and optimized font loading.
+
+PROJECTS
+OpenAccess Dashboard
+- Built open-source accessibility diagnostic dashboard using Next.js and Web Speech API.
+- Starred by 450+ developers on GitHub.
+
+EDUCATION
+B.S. in Computer Science | State University (2017 - 2021)
+- GPA: 3.8 / 4.0
+
+CERTIFICATIONS
+- IAAP Certified Web Accessibility Specialist (WAS)

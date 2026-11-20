@@ -11,8 +11,15 @@ interface FeedbackModalProps {
   companyName?: string;
 }
 
-export default function FeedbackModal({ isOpen, onClose, jobTitle = 'Accessible UI Engineer', companyName = 'AccessiCorp' }: FeedbackModalProps) {
-  const [feedbackType, setFeedbackType] = useState<'APPLICATION' | 'INTERVIEW' | 'WORKPLACE'>('INTERVIEW');
+type FeedbackType = 'APPLICATION' | 'INTERVIEW' | 'WORKPLACE';
+
+export default function FeedbackModal({ 
+  isOpen, 
+  onClose, 
+  jobTitle = 'Accessible UI Engineer', 
+  companyName = 'AccessiCorp' 
+}: FeedbackModalProps) {
+  const [feedbackType, setFeedbackType] = useState<FeedbackType>('INTERVIEW');
   const [rating, setRating] = useState(5);
   const [feedbackText, setFeedbackText] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -46,51 +53,59 @@ export default function FeedbackModal({ isOpen, onClose, jobTitle = 'Accessible 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-5 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#163B73]/25 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+      <div className="bg-white border border-[#DCE5F0] rounded-[20px] p-6 sm:p-7 max-w-md w-full space-y-5 shadow-2xl relative">
         
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition"
+          className="absolute top-5 right-5 text-[#718096] hover:text-[#172033] p-1 rounded-lg hover:bg-[#F1F5FA] transition"
+          aria-label="Close dialog"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-1">
-          <h3 className="text-base font-extrabold text-slate-850 dark:text-white flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-emerald-500" /> Accessibility Feedback Loop
-          </h3>
-          <p className="text-xs text-slate-500">
-            Submit anonymous accessibility feedback for {companyName} ({jobTitle}). Over time, candidate ratings refine employer readiness scores.
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED]">
+              <MessageSquare className="w-5 h-5" />
+            </span>
+            <div>
+              <h3 className="text-base font-bold text-[#172033]">
+                Accessibility Experience Feedback
+              </h3>
+              <p className="text-xs text-[#718096]">
+                {jobTitle} • {companyName}
+              </p>
+            </div>
+          </div>
         </div>
 
         {submitted ? (
-          <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center space-y-2">
-            <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
-            <h4 className="font-bold text-sm text-slate-850 dark:text-white">Feedback Submitted!</h4>
-            <p className="text-xs text-slate-500">Thank you for helping us make hiring processes accessible.</p>
+          <div className="py-8 text-center space-y-2">
+            <CheckCircle2 className="w-12 h-12 text-[#16A36A] mx-auto animate-bounce" />
+            <h4 className="font-bold text-sm text-[#172033]">Thank you for your rating!</h4>
+            <p className="text-xs text-[#718096]">Your feedback helps improve inclusive hiring practices.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-            <div>
-              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Feedback Category
-              </label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {/* Feedback Stage Selection */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#172033]">Touchpoint Evaluated</label>
               <div className="grid grid-cols-3 gap-2">
-                {[
-                  { key: 'APPLICATION', label: 'Application' },
-                  { key: 'INTERVIEW', label: 'Interview' },
-                  { key: 'WORKPLACE', label: 'Workplace' },
-                ].map((item) => (
+                {([
+                  { id: 'APPLICATION', label: 'Application' },
+                  { id: 'INTERVIEW', label: 'Interview' },
+                  { id: 'WORKPLACE', label: 'Workplace' },
+                ] satisfies { id: FeedbackType; label: string }[]).map((item) => (
                   <button
-                    key={item.key}
+                    key={item.id}
                     type="button"
-                    onClick={() => setFeedbackType(item.key as any)}
-                    className={`py-2 border rounded-xl font-bold transition ${
-                      feedbackType === item.key
-                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400'
-                        : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'
+                    onClick={() => setFeedbackType(item.id)}
+                    className={`py-2 text-xs font-bold rounded-xl border transition ${
+                      feedbackType === item.id
+                        ? 'border-[#2F6FED] bg-[#EAF2FF] text-[#2F6FED]'
+                        : 'border-[#DCE5F0] bg-white text-[#4B5870] hover:bg-[#F7F9FC]'
                     }`}
                   >
                     {item.label}
@@ -99,23 +114,20 @@ export default function FeedbackModal({ isOpen, onClose, jobTitle = 'Accessible 
               </div>
             </div>
 
-            <div>
-              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Accessibility Rating
-              </label>
-              <div className="flex items-center gap-1.5 py-1">
+            {/* Star Rating */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#172033]">Accommodation Quality</label>
+              <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
                     type="button"
                     onClick={() => setRating(star)}
-                    className="p-1 hover:scale-110 transition"
+                    className="p-1 rounded-lg hover:bg-[#F4F8FF] transition text-[#D98A00]"
                   >
                     <Star
                       className={`w-6 h-6 ${
-                        star <= rating
-                          ? 'fill-amber-400 text-amber-400'
-                          : 'text-slate-300 dark:text-slate-700'
+                        star <= rating ? 'fill-current text-[#D98A00]' : 'text-[#DCE5F0]'
                       }`}
                     />
                   </button>
@@ -123,29 +135,37 @@ export default function FeedbackModal({ isOpen, onClose, jobTitle = 'Accessible 
               </div>
             </div>
 
-            <div>
-              <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Feedback Details & Specific Barrier Observations
-              </label>
+            {/* Comments */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#172033]">Details or Suggestions</label>
               <textarea
-                rows={3}
-                required
-                placeholder="Were accommodations provided smoothly? Mention screen reader compatibility, captions, or entrance accessibility..."
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                placeholder="Share your experience with accommodations, captions, or interview format..."
+                rows={3}
+                className="w-full bg-white border border-[#DCE5F0] rounded-xl p-3 text-xs text-[#172033] focus:border-[#2F6FED] focus:ring-2 focus:ring-[#2F6FED]/20"
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-450 text-slate-950 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2"
-            >
-              <Send className="w-4 h-4" /> Submit Accessibility Rating
-            </button>
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#DCE5F0]">
+              <button
+                type="button"
+                onClick={onClose}
+                className="button-secondary text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="button-primary text-xs"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Submit Feedback</span>
+              </button>
+            </div>
           </form>
         )}
-
       </div>
     </div>
   );

@@ -1,0 +1,18 @@
+Alex Rivera
+Senior Full-Stack Accessibility Engineer
+Email: alex.rivera@example.com | Phone: (555) 019-2834 | Location: San Francisco, CA
+
+PROFESSIONAL SUMMARY
+Dedicated full-stack software engineer with over 8 years of experience building accessible, high-performance web applications and assistive AI interfaces. Expert in React, Next.js, TypeScript, Node.js, and WCAG 2.1 AA accessibility compliance.
+
+CORE SKILLS
+- Languages: TypeScript, JavaScript, Python, HTML5, CSS3, SQL
+- Frameworks & Libraries: React, Next.js, Node.js, Tailwind CSS, Framer Motion
+- Accessibility & Testing: WCAG 2.1 AA/AAA, ARIA, Jest, Cypress, Screen Readers
+- Architecture: REST APIs, Microservices, Atomic Database Design, WebSockets
+
+EXPERIENCE
+Lead Software Engineer | OpenAbility Tech (2022 - Present)
+- Architected inclusive job search platform serving over 50,000 active candidates with disabilities.
+- Built low-latency speech-to-text and AI voice interview simulation tools using Web Audio and WebSockets.
+- Enforced strict automated QA and accessibility test pipelines with 98% code coverage.

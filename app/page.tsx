@@ -6,16 +6,14 @@ import { useRouter } from 'next/navigation';
 import { useVoiceAgent } from '@/context/VoiceAgentContext';
 import { useAuth } from '@/context/AuthContext';
 import { 
-  HeartHandshake, 
   Mic, 
   FileText, 
   Briefcase, 
   Sparkles, 
   MessageSquareText, 
-  ArrowRight,
-  Compass,
-  LogOut
+  Compass
 } from 'lucide-react';
+import InnoSkillLogo from '@/components/brand/InnoSkillLogo';
 
 export default function Home() {
   const router = useRouter();
@@ -28,10 +26,6 @@ export default function Home() {
     handleVoiceModeDecision,
     handleLanguageDecision,
     handleAuthMethodDecision,
-    enableVoiceMode, 
-    enableTextMode, 
-    selectLanguageChoice, 
-    selectAuthChoice 
   } = useVoiceAgent();
   const { isAuthenticated, logout } = useAuth();
 
@@ -66,76 +60,75 @@ export default function Home() {
       window.removeEventListener('voice-focus-password-field', handleFocusPassword);
       window.removeEventListener('voice-focus-login-password-field', handleFocusLoginPassword);
     };
-  }, []);
+  }, [router, startZeroTouchVoiceEntry]);
 
   const handleStartVoice = () => {
     startZeroTouchVoiceEntry(true);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col justify-between p-6 sm:p-12 relative overflow-hidden select-none">
+    <div className="min-h-screen bg-[#F7F9FC] text-[#172033] font-sans flex flex-col justify-between p-6 sm:p-10 relative overflow-hidden select-none bg-pearl-grid">
       
       {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[640px] h-[640px] rounded-full pearl-glow pointer-events-none" />
 
-      {/* AUTHORITATIVE MULTIMODAL ENTRY MODAL */}
+      {/* Multimodal Entry Modal */}
       {(entryState === 'VOICE_MODE_QUESTION' || entryState === 'LANGUAGE_QUESTION' || entryState === 'AUTH_METHOD_QUESTION') && (
         <div 
-          className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-6"
+          className="fixed inset-0 bg-[#163B73]/25 backdrop-blur-xs z-50 flex items-center justify-center p-6 animate-in fade-in duration-200"
           role="dialog"
           aria-labelledby="multimodal-modal-title"
           aria-live="polite"
         >
-          <div className="bg-slate-900 border-2 border-emerald-500/40 p-8 sm:p-10 rounded-3xl max-w-lg w-full space-y-6 text-center shadow-2xl shadow-emerald-500/10 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white border border-[#DCE5F0] p-8 sm:p-10 rounded-[20px] max-w-lg w-full space-y-6 text-center shadow-[0_12px_40px_rgba(22,59,115,0.12)]">
             
             <button 
               onClick={() => startAgentListening()} 
-              className="w-16 h-16 bg-emerald-500/10 border-2 border-emerald-500/40 hover:bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto text-emerald-400 cursor-pointer transition focus:outline-none focus:ring-4 focus:ring-emerald-400"
+              className="w-16 h-16 bg-[#EAF2FF] border border-[#C8D5E5] hover:bg-[#DCE5F0] rounded-2xl flex items-center justify-center mx-auto text-[#2F6FED] cursor-pointer transition focus:ring-4 focus:ring-[#2F6FED]/20"
               title="Click to start or restart voice listening"
               aria-label="Click to start or restart voice listening"
             >
-              <Mic className={`w-8 h-8 ${status === 'LISTENING' ? 'animate-bounce text-emerald-400' : 'animate-pulse text-emerald-300'}`} />
+              <Mic className={`w-8 h-8 ${status === 'LISTENING' ? 'animate-bounce text-[#2F6FED]' : 'animate-pulse text-[#2F6FED]'}`} />
             </button>
 
             <div className="space-y-2">
-              <h3 id="multimodal-modal-title" className="text-2xl font-black text-white tracking-tight">
-                {entryState === 'LANGUAGE_QUESTION' ? 'Select Your Language' : 'Welcome to OpenAbility AI'}
+              <h3 id="multimodal-modal-title" className="text-2xl font-bold text-[#172033] tracking-tight">
+                {entryState === 'LANGUAGE_QUESTION' ? 'Select Your Language' : 'Welcome to InnoSkill AI'}
               </h3>
               
               {entryState === 'VOICE_MODE_QUESTION' && (
-                <p className="text-base text-slate-300 font-medium">
-                  Would you like to proceed with OpenAbility AI?
+                <p className="text-sm text-[#4B5870] font-medium">
+                  Would you like to proceed with InnoSkill AI voice guidance?
                 </p>
               )}
 
               {entryState === 'LANGUAGE_QUESTION' && (
-                <p className="text-base text-slate-300 font-medium">
+                <p className="text-sm text-[#4B5870] font-medium">
                   Which language would you like to use? English or Hindi?
                 </p>
               )}
 
               {entryState === 'AUTH_METHOD_QUESTION' && (
-                <p className="text-base text-slate-300 font-medium">
-                  Do you already have an OpenAbility account?
+                <p className="text-sm text-[#4B5870] font-medium">
+                  Do you already have an InnoSkill AI candidate account?
                 </p>
               )}
             </div>
 
-            {/* SYNCHRONIZED OPTIONS */}
+            {/* Synchronized Options */}
             {entryState === 'VOICE_MODE_QUESTION' && (
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-3.5 pt-2">
                 <button
                   onClick={() => handleVoiceModeDecision('yes')}
-                  aria-label="Proceed with OpenAbility AI"
-                  className="py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base rounded-2xl transition shadow-lg shadow-emerald-500/20 cursor-pointer focus:ring-4 focus:ring-emerald-300 focus:outline-none"
+                  aria-label="Proceed with InnoSkill AI"
+                  className="button-primary w-full py-3.5 text-sm"
                 >
                   YES
                 </button>
                 <button
                   onClick={() => handleVoiceModeDecision('no')}
                   aria-label="Decline voice assistant and use text mode"
-                  className="py-4 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-base rounded-2xl border border-slate-700 transition cursor-pointer focus:ring-4 focus:ring-slate-400 focus:outline-none"
+                  className="button-secondary w-full py-3.5 text-sm"
                 >
                   NO
                 </button>
@@ -143,86 +136,76 @@ export default function Home() {
             )}
 
             {entryState === 'LANGUAGE_QUESTION' && (
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-3.5 pt-2">
                 <button
                   onClick={() => handleLanguageDecision('en-IN')}
                   aria-label="Select English language"
-                  className="py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base rounded-2xl transition shadow-lg shadow-emerald-500/20 cursor-pointer focus:ring-4 focus:ring-emerald-300 focus:outline-none flex items-center justify-center gap-2"
+                  className="button-primary w-full py-3.5 text-sm flex items-center justify-center gap-2"
                 >
-                  <span className="text-xl">🇬🇧</span> English
+                  <span className="text-lg">🇬🇧</span> English
                 </button>
                 <button
                   onClick={() => handleLanguageDecision('hi-IN')}
-                  aria-label="हिंदी भाषा चुनें (Select Hindi language)"
-                  className="py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-base rounded-2xl transition shadow-lg shadow-cyan-500/20 cursor-pointer focus:ring-4 focus:ring-cyan-300 focus:outline-none flex items-center justify-center gap-2"
+                  aria-label="Select Hindi language"
+                  className="button-secondary w-full py-3.5 text-sm flex items-center justify-center gap-2"
                 >
-                  <span className="text-xl">🇮🇳</span> हिंदी
+                  <span className="text-lg">🇮🇳</span> हिंदी
                 </button>
               </div>
             )}
 
             {entryState === 'AUTH_METHOD_QUESTION' && (
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-3.5 pt-2">
                 <button
                   onClick={() => handleAuthMethodDecision('LOGIN')}
-                  className="py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base rounded-2xl transition shadow-lg shadow-emerald-500/20 cursor-pointer focus:ring-4 focus:ring-emerald-300"
+                  className="button-primary w-full py-3.5 text-sm"
                 >
-                  [ LOGIN ]
+                  Log In
                 </button>
                 <button
                   onClick={() => handleAuthMethodDecision('SIGNUP')}
-                  className="py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-base rounded-2xl transition shadow-lg shadow-cyan-500/20 cursor-pointer focus:ring-4 focus:ring-cyan-300"
+                  className="button-secondary w-full py-3.5 text-sm"
                 >
-                  [ SIGN UP ]
+                  Sign Up
                 </button>
               </div>
             )}
 
-            <div className="pt-2 text-xs text-slate-400 font-semibold space-y-1">
+            <div className="pt-2 text-xs text-[#718096] font-medium space-y-1">
               {status === 'LISTENING' ? (
-                <p className="text-emerald-400 font-bold animate-pulse">
-                  🎙 Listening... Say your choice or click an option.
+                <p className="text-[#2F6FED] font-bold animate-pulse">
+                  🎙 Listening... Speak your choice or click an option.
                 </p>
               ) : (
-                <p className="text-amber-400 font-semibold">
-                  Click microphone icon or say your choice.
+                <p className="text-[#D98A00] font-semibold">
+                  Click the microphone icon or speak your answer.
                 </p>
               )}
-              <p className="text-slate-300 text-[11px] font-medium">{feedback}</p>
+              {feedback && <p className="text-[#172033] text-[11px] font-medium">{feedback}</p>}
             </div>
 
           </div>
         </div>
       )}
 
-      {/* TOP BAR */}
-      <header className="max-w-4xl mx-auto w-full flex items-center justify-between z-10">
-        <Link href="/" className="flex items-center gap-3 group hover:opacity-90 transition cursor-pointer select-none" aria-label="OpenAbility AI Home">
-          <img 
-            src="/logo/logo.jpeg" 
-            alt="OpenAbility AI Logo" 
-            className="w-10 h-10 rounded-xl object-cover border border-emerald-500/30 group-hover:border-emerald-400 transition shadow-lg shadow-emerald-500/20" 
-          />
-          <div>
-            <h1 className="font-black text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">
-              OpenAbility AI
-            </h1>
-            <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Your ability. Your career. Your way.</p>
-          </div>
+      {/* Top Bar */}
+      <header className="max-w-5xl mx-auto w-full flex items-center justify-between z-10 py-2">
+        <Link href="/" className="flex items-center group hover:opacity-95 transition cursor-pointer select-none" aria-label="InnoSkill AI Home">
+          <InnoSkillLogo variant="header" size="md" />
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           {isAuthenticated ? (
             <>
               <Link
                 href="/dashboard"
-                className="text-xs font-bold text-slate-200 hover:text-white transition px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800"
+                className="button-primary text-xs !py-2 !min-h-9"
               >
                 Candidate Hub
               </Link>
               <button
                 onClick={logout}
-                className="text-xs font-bold text-slate-400 hover:text-red-400 transition px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800"
+                className="button-ghost text-xs !py-2 !min-h-9"
               >
                 Log Out
               </button>
@@ -231,13 +214,13 @@ export default function Home() {
             <>
               <Link
                 href="/login"
-                className="text-xs font-bold text-slate-300 hover:text-white transition px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800"
+                className="button-ghost text-xs !py-2 !min-h-9"
               >
                 Log In
               </Link>
               <Link
                 href="/signup"
-                className="text-xs font-black text-slate-950 transition px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 shadow-md shadow-emerald-500/20"
+                className="button-primary text-xs !py-2 !min-h-9"
               >
                 Sign Up
               </Link>
@@ -246,65 +229,67 @@ export default function Home() {
         </div>
       </header>
 
-      {/* MAIN CENTERED HERO HERO SECTION */}
-      <main className="max-w-3xl mx-auto w-full text-center space-y-8 my-auto z-10 py-12">
+      {/* Main Centered Hero Section */}
+      <main className="max-w-3xl mx-auto w-full text-center space-y-8 my-auto z-10 py-12 sm:py-16">
         
         {/* Eyebrow */}
         <div className="inline-block">
-          <span className="text-[11px] text-emerald-400 font-bold uppercase tracking-[0.2em] bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
-            Multimodal Voice + Visual Entry System
+          <span className="text-[11px] text-[#2F6FED] font-bold uppercase tracking-[0.16em] bg-[#EAF2FF] px-4 py-1.5 rounded-full border border-[#C8D5E5]">
+            Inclusive Multimodal Career Platform
           </span>
         </div>
 
         {/* Big Clean Editorial Headline */}
         <div className="space-y-4">
-          <h2 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight text-white">
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight text-[#172033]">
             Your ability. Your career.<br />
-            <span className="bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">Your way.</span>
-          </h2>
-          <p className="text-lg sm:text-xl text-slate-300 font-medium max-w-xl mx-auto">
-            &ldquo;How can I help you today?&rdquo;
+            <span className="text-[#2F6FED]">Your way.</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-[#4B5870] font-medium max-w-xl mx-auto">
+            &ldquo;How can I help you take your next career step today?&rdquo;
           </p>
         </div>
 
         {/* Core Primary Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
           <button
             onClick={handleStartVoice}
             autoFocus
             aria-label="Start Voice Assistant (Press Spacebar or Tap)"
-            className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-2xl transition shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3 cursor-pointer focus:ring-4 focus:ring-emerald-300 focus:outline-none"
+            className="button-primary w-full sm:w-auto px-7 py-3.5 text-sm !rounded-2xl shadow-md"
           >
-            <Mic className="w-5 h-5 text-slate-950 animate-pulse" />
-            Start Voice Assistant (Press Space or Tap)
+            <Mic className="w-5 h-5 text-white animate-pulse" />
+            <span>Start Voice Assistant (Space or Tap)</span>
           </button>
 
           <Link
             href="/onboarding"
-            className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-200 hover:text-white font-extrabold text-sm rounded-2xl transition flex items-center justify-center gap-2"
+            className="button-secondary w-full sm:w-auto px-7 py-3.5 text-sm !rounded-2xl"
           >
-            <MessageSquareText className="w-4 h-4 text-emerald-400" />
-            Use Text Interface
+            <MessageSquareText className="w-4 h-4 text-[#2F6FED]" />
+            <span>Use Guided Profile</span>
           </Link>
         </div>
 
         {/* 4 Core Direct Pathways */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-8">
           {[
-            { label: 'Find Jobs', href: '/dashboard/jobs', icon: Briefcase, color: 'text-emerald-400' },
-            { label: 'Build Resume', href: '/dashboard/resume', icon: FileText, color: 'text-cyan-400' },
-            { label: 'Career Plan', href: '/dashboard/skills', icon: Compass, color: 'text-teal-400' },
-            { label: 'Mock Interview', href: '/dashboard/interview', icon: Sparkles, color: 'text-emerald-300' }
+            { label: 'Find Jobs', href: '/dashboard/jobs', icon: Briefcase },
+            { label: 'Build Resume', href: '/dashboard/resume', icon: FileText },
+            { label: 'Career Plan', href: '/dashboard/skills', icon: Compass },
+            { label: 'Mock Interview', href: '/dashboard/interview', icon: Sparkles }
           ].map((item, idx) => {
             const Icon = item.icon;
             return (
               <Link
                 key={idx}
                 href={item.href}
-                className="p-4 bg-slate-900/60 border border-slate-855 hover:border-slate-700 rounded-2xl flex flex-col items-center justify-center gap-2.5 transition hover:-translate-y-0.5"
+                className="surface-card surface-card-interactive p-4.5 flex flex-col items-center justify-center gap-2.5 hover:border-[#2F6FED]/50 group"
               >
-                <Icon className={`w-5 h-5 ${item.color}`} />
-                <span className="text-xs font-bold text-slate-300">{item.label}</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EAF2FF] text-[#2F6FED] transition-colors group-hover:bg-[#2F6FED] group-hover:text-white">
+                  <Icon className="w-5 h-5" />
+                </span>
+                <span className="text-xs font-bold text-[#172033] group-hover:text-[#2F6FED] transition-colors">{item.label}</span>
               </Link>
             );
           })}
@@ -312,9 +297,9 @@ export default function Home() {
 
       </main>
 
-      {/* FOOTER */}
-      <footer className="max-w-4xl mx-auto w-full text-center text-[11px] text-slate-500 z-10">
-        OpenAbility AI · Designed for persons with disabilities · Indian English (`en-IN`) Voice Engine Active
+      {/* Footer */}
+      <footer className="max-w-5xl mx-auto w-full text-center text-xs text-[#718096] z-10 py-3 border-t border-[#DCE5F0]">
+        InnoSkill AI • Inclusive Career Companion • Accessible by Design • WCAG 2.1 AA Compliant
       </footer>
 
     </div>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Sidebar from '@/components/layout/Sidebar';
 import AccessibilityControls from '@/components/layout/AccessibilityControls';
 import PersistentAssistant from '@/features/assistant/PersistentAssistant';
+import InnoSkillLogo from '@/components/brand/InnoSkillLogo';
 import { useVoiceAgent } from '@/context/VoiceAgentContext';
 import { useAuth } from '@/context/AuthContext';
 import { Bell, Menu, LogOut, ShieldCheck } from 'lucide-react';
@@ -24,13 +25,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     .toUpperCase() || 'C';
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-800 transition-colors duration-200">
+    <div className="workspace-shell flex h-screen w-screen overflow-hidden bg-[#F7F9FC] text-[#172033]">
       
       {/* Sidebar Navigation */}
       <div 
         className={`fixed inset-y-0 left-0 z-50 transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:relative lg:translate-x-0 transition-transform duration-200 ease-in-out lg:flex shrink-0`}
+        } shrink-0 transition-transform duration-200 ease-in-out lg:relative lg:flex lg:translate-x-0`}
       >
         <Sidebar onClose={() => setIsSidebarOpen(false)} />
       </div>
@@ -38,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Mobile Backdrop Mask */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden"
+          className="fixed inset-0 z-40 bg-[#163B73]/20 backdrop-blur-xs lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -46,56 +47,55 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Panel Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
-        {/* Sleek Top Header Navigation */}
-        <header className="h-16 border-b border-slate-200/80 bg-white flex items-center justify-between px-4 sm:px-8 shrink-0 relative z-25 shadow-xs">
-          <div className="flex items-center gap-3">
+        {/* Top Header — Pearl Blue + White */}
+        <header className="relative z-30 flex h-[68px] shrink-0 items-center justify-between border-b border-[#DCE5F0] bg-white px-4 shadow-[0_1px_3px_rgba(22,59,115,0.03)] sm:px-6 md:px-8">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 -ml-2 text-slate-500 hover:text-slate-800 lg:hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="-ml-2 rounded-xl p-2 text-[#718096] transition hover:bg-[#F1F5FA] hover:text-[#172033] lg:hidden"
               aria-label="Toggle navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             
-            <Link href="/" className="flex items-center gap-2 md:hidden hover:opacity-90 transition cursor-pointer" aria-label="Go to Home page">
-              <img src="/logo/logo.jpeg" alt="OpenAbility AI Logo" className="w-7 h-7 rounded-lg object-cover border border-teal-500/30" />
+            <Link href="/" className="flex items-center lg:hidden" aria-label="Go to Home page">
+              <InnoSkillLogo variant="compact" size="sm" showSubtitle={false} />
             </Link>
-            
-            <div className="hidden md:flex items-center gap-2">
-              <h2 className="font-bold text-slate-900 text-sm sm:text-base">
-                Candidate Workspace
-              </h2>
-              <span className="text-[10px] text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-teal-600" /> Non-Discriminatory Audit Passed
-              </span>
+            <div className="hidden min-w-0 items-center gap-3 lg:flex">
+              <div>
+                <h2 className="truncate text-sm font-bold text-[#172033]">Candidate Workspace</h2>
+                <p className="flex items-center gap-1.5 text-xs font-medium text-[#718096]">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#2F6FED]" /> Inclusive Career Intelligence
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Quick Header Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <AccessibilityControls />
 
             <button
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition focus:outline-none focus:ring-2 focus:ring-teal-400 relative"
+              className="relative rounded-xl p-2 text-[#718096] transition hover:bg-[#F1F5FA] hover:text-[#2F6FED]"
               aria-label="Notification center"
               title="Notifications"
             >
-              <Bell className="w-4.5 h-4.5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-teal-500 rounded-full" />
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#2F6FED]" />
             </button>
 
-            <div className="h-5 w-px bg-slate-200" />
+            <div className="hidden h-5 w-px bg-[#DCE5F0] sm:block" />
 
             {/* Candidate Avatar Badge */}
             <Link 
               href="/dashboard/profile"
-              className="flex items-center gap-2.5 p-1 rounded-full hover:bg-slate-100 transition-all duration-200 cursor-pointer group"
+              className="group flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition hover:bg-[#F1F5FA] border border-transparent hover:border-[#DCE5F0]"
               title="View & Edit Profile"
             >
-              <span className="text-xs font-bold text-slate-700 hidden sm:inline group-hover:text-teal-700 transition-colors">
+              <span className="hidden text-xs font-bold text-[#172033] transition-colors group-hover:text-[#2F6FED] md:inline">
                 {fullName}
               </span>
-              <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white uppercase text-xs shadow-xs group-hover:scale-105 transition-transform">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#EAF2FF] text-xs font-bold uppercase text-[#2F6FED] border border-[#C8D5E5]">
                 {initials}
               </div>
             </Link>
@@ -103,24 +103,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Logout Button */}
             <button
               onClick={logout}
-              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition focus:outline-none"
+              className="rounded-xl p-2 text-[#718096] transition hover:bg-[#FFF5F5] hover:text-[#D64545]"
               title="Log Out"
               aria-label="Log Out"
             >
-              <LogOut className="w-4.5 h-4.5" />
+              <LogOut className="h-5 w-5" />
             </button>
           </div>
         </header>
 
         {/* Dynamic Main Workspace View */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 relative bg-slate-50">
-          <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+        <main className="relative flex-1 overflow-y-auto bg-[#F7F9FC] p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl space-y-7 animate-fade-in-up">
             {children}
           </div>
         </main>
       </div>
 
-      {/* Floating Ask OpenAbility Assistant Button (voice logic intact) */}
+      {/* Floating InnoSkill AI Assistant Button */}
       <PersistentAssistant />
     </div>
   );

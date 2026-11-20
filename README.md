@@ -1,6 +1,6 @@
-# OpenAbility AI
+# InnoSkill AI
 
-OpenAbility AI is an inclusive career companion designed to adapt the hiring experience to the candidate, rather than forcing the candidate to adapt to a traditional recruitment platform. 
+InnoSkill AI is an inclusive career companion designed to adapt the hiring experience to the candidate, rather than forcing the candidate to adapt to a traditional recruitment platform. 
 
 The application focuses on professional abilities, career targets, and sensory/workplace accommodations without bias.
 

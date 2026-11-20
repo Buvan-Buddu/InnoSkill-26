@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    ".kilo/**",
+    "gemini-live-api-examples-main/**",
+    "scratch/**",
+    "generate_*.js",
+    "public/audio-worklet/**",
   ]),
 ]);
 

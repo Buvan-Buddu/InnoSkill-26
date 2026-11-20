@@ -4,10 +4,17 @@ import { db } from '@/database/db';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fullName, email, password } = body;
+    const fullName = (body.fullName || body.name || '').trim();
+    const email = (body.email || '').trim().toLowerCase();
+    const password = body.password;
 
     if (!fullName || !email || !password) {
       return NextResponse.json({ error: 'Full name, email, and password are required.' }, { status: 400 });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Please enter a valid email address.' }, { status: 400 });
     }
 
     if (password.length < 6) {
