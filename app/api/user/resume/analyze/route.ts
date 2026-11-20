@@ -172,15 +172,24 @@ export async function POST(request: Request) {
     // Storage & Database Isolation
     let savedResumeId = `res-${Date.now()}`;
     try {
-      const storageDir = path.join(process.cwd(), 'storage', 'resumes');
-      if (!fs.existsSync(storageDir)) {
-        fs.mkdirSync(storageDir, { recursive: true });
-      }
+      const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+      const storageDir = isServerless
+        ? path.join('/tmp', 'resumes')
+        : path.join(process.cwd(), 'storage', 'resumes');
 
-      const cleanBaseName = path.basename(file.name || 'resume.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
-      const safeFileName = `${session.user.id}_${Date.now()}_${cleanBaseName}`;
-      const fileStoragePath = path.join(storageDir, safeFileName);
-      fs.writeFileSync(fileStoragePath, buffer);
+      let fileStoragePath = 'in-memory';
+      try {
+        if (!fs.existsSync(storageDir)) {
+          fs.mkdirSync(storageDir, { recursive: true });
+        }
+
+        const cleanBaseName = path.basename(file.name || 'resume.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const safeFileName = `${session.user.id}_${Date.now()}_${cleanBaseName}`;
+        fileStoragePath = path.join(storageDir, safeFileName);
+        fs.writeFileSync(fileStoragePath, buffer);
+      } catch {
+        // Safe fallback in restricted environments
+      }
 
       const savedResume = db.addResume(
         session.user.id,

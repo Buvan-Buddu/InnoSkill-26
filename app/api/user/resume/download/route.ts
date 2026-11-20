@@ -31,11 +31,23 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Forbidden: You do not own this resume.' }, { status: 403 });
   }
 
-  if (!fs.existsSync(targetResume.fileStoragePath)) {
-    return NextResponse.json({ error: 'File not found on server.' }, { status: 404 });
+  let fileContent: string | null = null;
+  if (fs.existsSync(targetResume.fileStoragePath)) {
+    try {
+      fileContent = fs.readFileSync(targetResume.fileStoragePath, 'utf-8');
+    } catch {
+      fileContent = null;
+    }
   }
 
-  const fileContent = fs.readFileSync(targetResume.fileStoragePath, 'utf-8');
+  if (!fileContent && targetResume.parsedText) {
+    fileContent = targetResume.parsedText;
+  }
+
+  if (!fileContent) {
+    return NextResponse.json({ error: 'File content not found on server.' }, { status: 404 });
+  }
+
   return new NextResponse(fileContent, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',

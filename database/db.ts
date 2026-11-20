@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import bundledStore from './openability_store.json';
 
 // Types & Interfaces
 export interface DbUser {
@@ -154,34 +155,45 @@ interface DatabaseSchema {
   voicePreferences: DbVoicePreferences[];
 }
 
-const DB_FILE_PATH = path.join(process.cwd(), 'database', 'openability_store.json');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const DB_FILE_PATH = isServerless
+  ? path.join('/tmp', 'openability_store.json')
+  : path.join(process.cwd(), 'database', 'openability_store.json');
+
+// In-memory cache for ultra-resilient, fast serverless runtime
+let inMemoryStore: DatabaseSchema | null = null;
 
 // Initialize Store
 function readDatabase(): DatabaseSchema {
+  if (inMemoryStore) {
+    return inMemoryStore;
+  }
+
   try {
-    if (!fs.existsSync(DB_FILE_PATH)) {
-      const initialDb: DatabaseSchema = {
-        users: [],
-        sessions: [],
-        resetTokens: [],
-        profiles: [],
-        accessibilityProfiles: [],
-        resumes: [],
-        skills: [],
-        savedJobs: [],
-        jobInteractions: [],
-        interviewSessions: [],
-        careerProgress: [],
-        voicePreferences: []
-      };
-      writeDatabase(initialDb);
-      return initialDb;
+    if (fs.existsSync(DB_FILE_PATH)) {
+      const raw = fs.readFileSync(DB_FILE_PATH, 'utf-8');
+      inMemoryStore = JSON.parse(raw);
+      return inMemoryStore!;
     }
-    const raw = fs.readFileSync(DB_FILE_PATH, 'utf-8');
-    return JSON.parse(raw);
   } catch (error) {
-    console.error('Error reading database, creating fresh store:', error);
-    return {
+    console.warn('Could not read store from disk, falling back to bundled store:', error);
+  }
+
+  // Fallback to bundled store
+  try {
+    inMemoryStore = JSON.parse(JSON.stringify(bundledStore)) as DatabaseSchema;
+    if (isServerless) {
+      try {
+        const dir = path.dirname(DB_FILE_PATH);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(DB_FILE_PATH, JSON.stringify(inMemoryStore, null, 2), 'utf-8');
+      } catch {
+        // Disk write fallback safe
+      }
+    }
+    return inMemoryStore;
+  } catch {
+    inMemoryStore = {
       users: [],
       sessions: [],
       resetTokens: [],
@@ -195,10 +207,12 @@ function readDatabase(): DatabaseSchema {
       careerProgress: [],
       voicePreferences: []
     };
+    return inMemoryStore;
   }
 }
 
 function writeDatabase(data: DatabaseSchema): void {
+  inMemoryStore = data;
   try {
     const dir = path.dirname(DB_FILE_PATH);
     if (!fs.existsSync(dir)) {
@@ -208,7 +222,7 @@ function writeDatabase(data: DatabaseSchema): void {
     fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), 'utf-8');
     fs.renameSync(tempPath, DB_FILE_PATH);
   } catch (error) {
-    console.error('Error writing database:', error);
+    console.warn('Persistent disk write skipped (in-memory state preserved):', error);
   }
 }
 

@@ -31,14 +31,23 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { fileName, parsedText, structuredAnalysis } = body;
 
-    const storageDir = path.join(process.cwd(), 'storage', 'resumes');
-    if (!fs.existsSync(storageDir)) {
-      fs.mkdirSync(storageDir, { recursive: true });
-    }
+    const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+    const storageDir = isServerless
+      ? path.join('/tmp', 'resumes')
+      : path.join(process.cwd(), 'storage', 'resumes');
 
-    const safeFileName = `${session.user.id}_${Date.now()}_${fileName || 'resume.txt'}`;
-    const fileStoragePath = path.join(storageDir, safeFileName);
-    fs.writeFileSync(fileStoragePath, parsedText || 'Resume content', 'utf-8');
+    let fileStoragePath = 'in-memory';
+    try {
+      if (!fs.existsSync(storageDir)) {
+        fs.mkdirSync(storageDir, { recursive: true });
+      }
+
+      const safeFileName = `${session.user.id}_${Date.now()}_${fileName || 'resume.txt'}`;
+      fileStoragePath = path.join(storageDir, safeFileName);
+      fs.writeFileSync(fileStoragePath, parsedText || 'Resume content', 'utf-8');
+    } catch {
+      // Safe fallback if filesystem is read-only
+    }
 
     const resume = db.addResume(session.user.id, fileName || 'resume.pdf', fileStoragePath, parsedText, structuredAnalysis);
 
